@@ -1,18 +1,16 @@
 <template>
-	<div id="app">
+	<div id="app" class>
 		<nav-bar></nav-bar>
-		<BinarySearchTree />
+		<router-view></router-view>
 	</div>
 </template>
 
 <script>
-import BinarySearchTree from "./components/BinarySearchTree.vue";
 import NavBar from "./components/NavBar.vue";
 
 export default {
 	name: "app",
 	components: {
-		BinarySearchTree,
 		NavBar
 	}
 };
@@ -25,6 +23,7 @@ export default {
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	color: #2c3e50;
+	width: 100%;
 	/* margin-top: 60px; */
 }
 </style>
