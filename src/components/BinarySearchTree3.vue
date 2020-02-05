@@ -16,7 +16,9 @@
             ></b-form-input>
           </b-col>
           <b-col sm="6" class="text-left">
-            <b-button squared variant="outline-info" @click="insert">Insert</b-button>
+            <b-button squared variant="outline-info" @click="insert"
+              >Insert</b-button
+            >
           </b-col>
         </b-row>
       </b-col>
@@ -31,7 +33,9 @@
             ></b-form-input>
           </b-col>
           <b-col sm="6" class="text-left">
-            <b-button squared variant="outline-danger" @click="remove">Remove</b-button>
+            <b-button squared variant="outline-danger" @click="remove"
+              >Remove</b-button
+            >
           </b-col>
         </b-row>
       </b-col>
@@ -50,7 +54,7 @@
 import * as d3 from "d3";
 // import { link } from "fs";
 import { BST } from "@/model/bst";
-import { link } from 'fs';
+import { link } from "fs";
 export default {
   name: "BinarySearchTree3",
   data: function() {
@@ -71,8 +75,8 @@ export default {
       removeError: false,
 
       //********* Configurations */
-      canvasWidth: 400,
-      canvasHeight: 400,
+      canvasWidth: 200,
+      canvasHeight: 200,
       fontSize: "20px",
       nodeFillColor: "#FFFFFF",
       nodeRadius: 30,
@@ -80,12 +84,14 @@ export default {
       nodeStrokeColorHilighted: "#AB0505",
       nodeFontColorDefault: "#262626",
       nodeFontColorHilighted: "#AB0505",
-      nodeStrokeWidth: "2px",
+      nodeStrokeWidth: 2, //2px
       rootOffsetX: 0,
       rootOffsetY: 0,
 
       widthIncrement: 50,
-      heightIncrement: 180
+      heightIncrement: 180,
+
+      animationTimePrimary: 1000
 
       //All the non reactive properties are defined in the created() lifecycle hook
     };
@@ -115,7 +121,7 @@ export default {
       let linkLength = 180;
 
       vm.treeData = this.tree(vm.treeRootNode);
-      debugger
+      //   debugger;
 
       vm.treeData.descendants().forEach((descendant, index) => {
         //If it's the first child, we know it's the root element. So, we don't want to move it yet
@@ -123,125 +129,153 @@ export default {
 
         let parent = descendant.parent;
 
-        // if (descendant.data.data <= parent.data.data) {
-        //   // descendant.x -= descendant.depth * vm.widthIncrement;
-        //   descendant.y = parent.y + linkLength;
-        // } else {
-        //   // descendant.x += descendant.depth * vm.widthIncrement;
-        //   descendant.y = parent.y + linkLength;
-        // }
         descendant.y = parent.y + linkLength;
       });
-
-
 
       //get link selection and join data
       // const links = this.graph.selectAll(".link").data(vm.treeData.links());
 
       const nodes1 = vm.treeData.descendants();
-      const links1 = vm.treeData.descendants().slice(1);
-
-      const links = this.graph.selectAll(".link").data(vm.treeData.links());
-
-      this.graph.selectAll(".link");
-
-      links
-        .enter()
-        .append("line")
-        .attr("id", function(d) {
-          return `${d.source.data.data}-depth-${d.source.depth}-link-${d.target.data.data}-depth-${d.target.depth}`;
-        })
-        .merge(links)
-        .attr("class", "link")
-        .attr("fill", "none")
-        .attr("stroke", "#aaa")
-        .attr("stroke-color", 2)
-        .attr("x1", d => {
-          // debugger;
-          return d.source.x;
-        })
-        .attr("y1", d => {
-          return d.source.y;
-        })
-        .attr("x2", function(d) {
-          return d.target.x;
-        })
-        .attr("y2", d => {
-          console.log(d.target);
-          return d.target.y;
-        });
 
       //get nodes selection and join data
       const nodes = this.graph
         .selectAll(".node")
         .data(vm.treeData.descendants());
+
+      //update text of existing element
+      nodes.select("text").text(function(d) {
+        return d.data.data;
+      });
       //create enter node groups
-      debugger;
       const enterNodes = nodes
         .enter()
         .append("g")
         .attr("id", d => {
           return `node-${d.data.data}-depth-${d.depth}`;
         })
-        .attr("class", "node");
+        .attr("class", "node")
+        .attr("visibility", d => {
+          // if(isNaN(d.data.data)){
+          //     return "hidden";
+          // }
+          // else{
+          return "visible";
+          // }
+        });
 
       //append circle to enter nodes
       enterNodes
         .append("circle")
-        .attr("cx", vm.rootOffsetX)
-        .attr("cy", vm.rootOffsetY)
+        // .attr("cx", vm.rootOffsetX)
+        // .attr("cy", vm.rootOffsetY)
         .attr("r", vm.nodeRadius)
         .attr("stroke", vm.nodeStrokeColorDefault)
-        .attr("stroke-width", "2px")
+        .attr("stroke-width", `${vm.nodeStrokeWidth}px`)
         .attr("fill", vm.nodeFillColor);
 
       //append text
       enterNodes
         .append("text")
-        .text(function(d) {
-          return d.data.data;
-        })
         .attr("text-anchor", "middle")
         .attr("font-size", vm.fontSize)
         .attr("fill", vm.nodeFontColorDefault)
-        .attr("transform", `translate(0, 7)`);
+        .attr("transform", `translate(0, 7)`)
+        .text(function(d) {
+          return d.data.data;
+        });
+
+      nodes.exit().remove();
 
       //Update both the existing node and enter node
-      enterNodes.merge(nodes).attr("transform", function(d) {
-        return `translate(${d.x},${d.y})`;
-      });
+      enterNodes
+        .merge(nodes)
+        // .transition()
+        // .duration(1000)
+        .attr("transform", function(d) {
+          return `translate(${d.x},${d.y})`;
+        });
+
+      const links1 = vm.treeData.descendants().slice(1);
+      const links = this.graph.selectAll(".link").data(links1);
+      let linkEnter = links
+        .enter()
+        .append("line")
+        .attr("id", function(d) {
+          return `${d.data.data}-depth-${d.depth}-link-${d.data.data}-depth-${d.depth}`;
+        })
+        .attr("class", "link")
+        .attr("fill", "none")
+        .attr("stroke", "#aaa")
+        // .attr("stroke-opacity", d => {
+        //   if (isNaN(d.data.data)) {
+        //     return "0%";
+        //   } else {
+        //     return "100%";
+        //   }
+        // })
+        .attr("stroke-color", vm.nodeStrokeColorDefault)
+        .attr("x1", d => {
+          return d.parent.x;
+        })
+        .attr("y1", d => {
+          return d.parent.y;
+        })
+        .attr("x2", function(d) {
+          return d.parent.x;
+        })
+        .attr("y2", d => {
+          return d.parent.y;
+        });
+
+      let linkUpdate = linkEnter.merge(links);
+
+      linkUpdate
+        .transition()
+        .delay(1000)
+        .transition(1000)
+        .duration(1000)
+        .attr("x1", d => {
+          return d.parent.x;
+        })
+        .attr("y1", d => {
+          return d.parent.y;
+        })
+        .attr("x2", function(d) {
+          return d.x;
+        })
+        .attr("y2", d => {
+          return d.y;
+        });
+
+      links.exit().remove();
     },
-    insert: function() {
-      if (this.newNumber === "") {
-        this.insertError = true;
+    insert: async function() {
+      const vm = this;
+      if (vm.newNumber === "") {
+        vm.insertError = true;
         return;
       }
-      this.newNumber = parseInt(this.newNumber);
-
-      let rt = this.bst.insertData(this.newNumber);
-
-      // this.newNumber = "";
-      // this.insertError = false;
-      // this.update(rootNode);
+      vm.newNumber = parseInt(vm.newNumber);
 
       let rootNode;
       //If the tree is not already defined, we know that there are no nodes in the
       //tree yet. Thus make the root node
-      if (this.treeData !== undefined) {
+      let newNode;
+      if (vm.treeData !== undefined) {
         //Now go down the tree and light the nodes as we visit them in bst
-        rootNode = this.treeData;
+        rootNode = vm.treeData;
         let inserted = false;
 
         while (inserted === false) {
           //Get the next node that should be visited for this data
-          let nextNode = this.getNextNode(this.newNumber, rootNode);
+          let nextNode = vm.getNextNode(vm.newNumber, rootNode);
 
           if (nextNode === undefined) {
-            let newNode = this.makeChild(this.newNumber, rootNode);
-            let emptyNode = this.makeChild(NaN, rootNode);
+            newNode = vm.makeChild(vm.newNumber, rootNode);
+            let emptyNode = vm.makeChild(NaN, rootNode);
             let children = rootNode.children;
 
-            if (this.newNumber <= rootNode.data.data) {
+            if (vm.newNumber <= rootNode.data.data) {
               //If root node already has a child, make this the first child
               if (children === undefined) {
                 rootNode.children = [newNode, emptyNode];
@@ -262,20 +296,100 @@ export default {
           }
         }
       } else {
-        rootNode = d3.hierarchy({ data: this.newNumber });
-        this.treeRootNode = rootNode;
+        newNode = vm.makeChild(this.newNumber, undefined);
+        vm.treeRootNode = newNode;
+        // vm.update(rootNode);
       }
-      this.update(rootNode);
 
-      this.canvasHeight += this.heightIncrement;
-      this.canvasWidth += this.widthIncrement;
-    //   this.tree = d3
-    //     .tree()
-    //     .size([this.canvasWidth, this.canvasHeight - 50 - this.nodeRadius - 5]);
-      this.newNumber = "";
-      this.insertError = false;
+      debugger;
+      vm.animateTraversal(newNode);
+      vm.update(newNode);
+      // this.addANode(rootNode, newNode);
 
-      this.selectNode(this.treeRootNode);
+      // debugger;
+      // vm.update(rootNode);
+
+      vm.canvasHeight += vm.heightIncrement;
+      vm.canvasWidth += vm.widthIncrement;
+      //   vm.tree = d3
+      //     .tree()
+      //     .size([vm.canvasWidth, vm.canvasHeight - 50 - vm.nodeRadius - 5]);
+      vm.newNumber = "";
+      vm.insertError = false;
+    },
+    async addANode(rootNode, newNode) {
+      debugger;
+      let vm = this;
+      let tree = this.tree(rootNode);
+
+      let selectorString = "";
+      tree.descendants().forEach((descendant, index) => {
+        selectorString += "#" + descendant.data.id;
+        if (index < tree.descendants().length - 1) {
+          selectorString += ",";
+        }
+
+        //If it's the first child, we know it's the root element. So, we don't want to move it yet
+        if (index == 0) return;
+
+        let parent = descendant.parent;
+
+        descendant.y = parent.y + 180;
+      });
+
+      const nodes = this.graph
+        .selectAll(`${selectorString}`)
+        .data(tree.descendants());
+
+      const enterNodes = nodes
+        .enter()
+        .append("g")
+        .attr("id", d => {
+          return `node-${d.data.data}-depth-${d.depth}`;
+        })
+        .attr("class", "node")
+        .attr("visibility", d => {
+          // if(isNaN(d.data.data)){
+          //     return "hidden";
+          // }
+          // else{
+          return "visible";
+          // }
+        });
+
+      //append circle to enter nodes
+      enterNodes
+        .append("circle")
+        .attr("r", vm.nodeRadius)
+        .attr("stroke", vm.nodeStrokeColorDefault)
+        .attr("stroke-width", `${vm.nodeStrokeWidth}px`)
+        .attr("fill", vm.nodeFillColor);
+
+      //append text
+      enterNodes
+        .append("text")
+        .attr("text-anchor", "middle")
+        .attr("font-size", vm.fontSize)
+        .attr("fill", vm.nodeFontColorDefault)
+        .attr("transform", `translate(0, 7)`)
+        .text(function(d) {
+          return d.data.data;
+        });
+
+      //Update both the existing node and enter node
+      let transition = enterNodes
+        .transition()
+        .duration(function(d, i) {
+          if (isNaN(d.data.data)) return 0;
+          else return 1000;
+        })
+        .attr("transform", function(d) {
+          return `translate(${d.x},${d.y})`;
+        });
+
+      await transition.end();
+
+      // vm.update(undefined);
     },
 
     /**
@@ -309,32 +423,94 @@ export default {
         }
       }
     },
-    makeChild(data, rootNode) {
+    makeChild(data, parentNode) {
       let newNode = d3.hierarchy({ data: data, children: [] }, d => d.children);
-      newNode.depth = rootNode.depth + 1;
-      newNode.height = rootNode.height - 1;
-      newNode.parent = rootNode;
+      //If it does not have a parent node, then we know that it is a root node
+      if (parentNode === undefined) {
+        newNode.depth = 0;
+        newNode.height = 0;
+      } else {
+        newNode.depth = parentNode.depth + 1;
+        newNode.height = parentNode.height - 1;
+        newNode.parent = parentNode;
+      }
+      newNode.data.id = `node-${data}-depth-${newNode.depth}`;
 
-      newNode.parent = rootNode;
       return newNode;
     },
 
-    selectNode(node) {
-      d3.selectAll(`#node-${node.data.data}-depth-${node.depth}`)
-        .select("circle")
+    async animateTraversal(childNode) {
+      debugger;
+      let vm = this;
+
+      let ancestors = childNode.ancestors();
+
+      let currentNode = ancestors[ancestors.length - 1];
+      let outerRing = this.graph
+        .append("circle")
+        .attr("id", "aa-selection-ring")
+        .style("opacity", "0")
+        .attr("cx", currentNode.x) //TODO: 50 is the actual transaction of the svg. Make this a variable
+        .attr("cy", currentNode.y) //TODO: 50 is the actual transaction of the svg. Make this a variable
+        .attr("r", vm.nodeRadius + vm.nodeStrokeWidth)
+        .attr("fill", "none")
+        .attr("stroke-width", `${vm.nodeStrokeWidth + 1}px`)
+        .attr("stroke", vm.nodeStrokeColorHilighted);
+
+      await outerRing
         .transition()
+        .ease(d3.easeLinear)
         .duration(1000)
-        .attr("stroke", this.nodeStrokeColorHilighted)
-        .transition()
-        .delay(1000)
-        .style("stroke", this.nodeStrokeColorDefault);
+        .style("opacity", "1")
+        .end();
+
+      //go to the next node
+      let nextNodeIndex = ancestors.length - 2;
+
+      // if(nextNodeIndex >=)
+
+      // .on("end", function() {
+      //   debugger;
+      //   let nextNodeIndex = ancestors.length - 2;
+      //   if (nextNodeIndex >= 0) {
+      //     vm.goToNode(ancestors, nextNodeIndex);
+      //   } else {
+      //     outerRing
+      //       .transition()
+      //       .duration(500)
+      //       .remove();
+      //   }
+      // });
+    },
+    goToNode(nodes, currentIndex) {
+      let vm = this;
+      // if (currentIndex < 0) {
+
+      //   d3.select('#aa-selection-ring')
+      //   .transition()
+      //   .duration(1000)
+      //   .style('opacity',"0")
+      //   .remove();
+      // } else {
+      if (currentIndex > 0) {
+        let currentNode = nodes[currentIndex];
+
+        d3.select("#aa-selection-ring")
+          .transition()
+          .duration(1000)
+          .attr("transform", `translate(${-currentNode.x},${currentNode.y})`)
+          .on("end", function() {
+            let nextNodeIndex = --currentIndex; //Note: don't put -- after the variable as it does not immediately change the value of this expression
+            vm.goToNode(nodes, nextNodeIndex);
+          });
+      }
+      // }
     },
 
     remove: function() {}
   },
   mounted: function() {
     this.init();
-    // this.update(this.bst);
   },
   created: function() {
     /********** D3 variables */
