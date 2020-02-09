@@ -9,6 +9,8 @@ import BinarySearchTree3 from "@/components/BinarySearchTree3";
 
 import BinarySearchTree4 from "@/components/BinarySearchTree4";
 
+import BinarySearchTree5 from "@/components/BinarySearchTree5";
+
 Vue.use(Router);
 
 export default new Router({
@@ -33,6 +35,11 @@ export default new Router({
       path: "/bst4",
       name: "BinarySearchTree4",
       component: BinarySearchTree4
+    },
+    {
+      path: "/bst5",
+      name: "BinarySearchTree5",
+      component: BinarySearchTree5
     }
   ]
 });
