@@ -10,10 +10,9 @@ class Node {
     right = null;
     parent = null;
 
-    constructor(data, parent, id) {
+    constructor(data, id) {
         this.id = id;
         this.key = data;
-        this.parent = parent;
         this.left = null;
         this.right = null;
     }
@@ -34,7 +33,7 @@ class Node {
         return this.key;
     }
 
-    get children() {
+    children() {
         let children = [];
         if (this.left !== null) children.push(this.left);
 
@@ -59,7 +58,7 @@ class BST {
     }
     insertData(key, id, parentNode) {
         /* If the tree is empty, return a new node */
-        if (parentNode === null) return new Node(key, parentNode, id)
+        if (parentNode === null) return new Node(key, id)
 
         /* Otherwise, recur down the tree */
         if (key <= parentNode.key)
@@ -71,38 +70,65 @@ class BST {
         return parentNode;
     }
 
-    /*
-        parameter looks like this:
-        {attribute: "id", value:"node-75442486-0878-440c-9db1-a7006c25a39f"}
-        {attribute: "key", value:"5"}
-    */
-    searchNode(parameter) {
+    getLeafNodes() {
+
+        let leafNodes = [];
+        let queue = [];
+        queue.push(this.root);
+
+        while (queue.length > 0) {
+            let node = queue.pop();
+
+            if (node.children.length === 0) {
+                leafNodes.push(node);
+            } else {
+                for (const child of node.children) {
+                    queue.push(child);
+                }
+            }
+        }
+
+        return leafNodes;
+    }
+
+    // Returns parent node. If the node
+    // exists, it's parent is returned. If the node does not
+    // exist, a candidate-parent node is returned
+    getParentNode(key, id) {
         if (this.root === null) return null;
 
-        switch (parameter.id) {
-            case "id":
-                return this.searchNodeById(this.root);
-            case "key":
-                return this.searchNodeByKey(this.root);
+        if (this.root.left === null && this.root.right === null) return this.root;
+
+        return this._searchParentNode(this.root, key, id);
+    }
+
+    _searchParentNode(parent, key, id) {
+
+        if (key <= parent.key) {
+            if (parent.left === null || key === parent.left.key) return parent;
+
+            return this._searchParentNode(parent.left, key, id);
+        } else {
+            if (parent.right === null || key === parent.right.key) return parent;
+
+            return this._searchParentNode(parent.right, key, id);
         }
-    }
-
-    searchNodeByKey(parent) {
 
     }
 
-    searchNodeById(id, parent) {
-        if (parent === null)
-            return null;
+    height() {
+        return this._height(this.root);
+    }
+    _height(node) {
+        if (node === null) return 0;
 
-        if (parent.id === id)
-            return parent;
+        let leftHeight = this._height(node.left);
+        let rightHeight = this._height(node.right);
 
+        if (leftHeight > rightHeight) return leftHeight + 1;
+        else return rightHeight + 1;
     }
 
-    get root() {
-        return this.root;
-    }
 
 }
 

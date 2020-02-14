@@ -88,7 +88,11 @@ export default {
 			rootOffsetX: 0,
 			rootOffsetY: 0,
 
-			animationTimePrimary: 1000
+			animationTimePrimary: 1000,
+			animationTime800: 800,
+			animationTime600: 600,
+			animtionTime400: 400,
+			animationTime200: 200
 
 			//All the non reactive properties are defined in the created() lifecycle hook
 		};
@@ -112,17 +116,6 @@ export default {
 			//create a tree generator and specify the size of the digram
 		},
 
-		// insert: function(data) {
-		//   // Traverse to the to-be parent node of the node that will hold this data
-		//   let node = bst.insert();
-
-		//   //Insert Leaf Node
-		//   this.insertLeafNode(node);
-
-		//   //Redraw the tree
-		//   this.drawTree();
-		// },
-
 		insert: async function() {
 			if (this.newNumber === "") {
 				this.insertError = true;
@@ -135,13 +128,23 @@ export default {
 			let node = this.bstD3Wrapper.insert(this.newNumber, nodeId);
 
 			//Draw a temporary placeholder node
-			await this.drawNewNode(node, "tempNode", true);
+			// Note: the class should not be ".node" because otherwise existing node will
+			// be updated
+			await this.drawNodes(node, "node", false);
+
+			if (this.bstD3Wrapper.height() > 1) {
+				let ancestors = this.bstD3Wrapper.getPathToParent(node.data.id);
+				await this.traverse(ancestors, false);
+
+				await this.drawNodes(node, "node", true);
+				await this.drawLinks(node.parent, ".link");
+				await this.goToNode(node.x, node.y);
+				this.fadeOutRing();
+			}
 
 			// this.graph.select(`.${nodeId}`).remove();
-			this.drawNewNode(this.bstD3Wrapper.tree(), "node", true);
-			this.drawNewLink(this.bstD3Wrapper.tree(), ".link");
-			// debugger;
-			// this.resizeTree();
+			this.drawNodes(this.bstD3Wrapper.tree(true), "node", true);
+			this.drawLinks(this.bstD3Wrapper.tree(false), ".link");
 
 			this.newNumber = "";
 			this.insertError = false;
@@ -152,12 +155,14 @@ export default {
 		 * Draws nodes using the specified selection String.
 		 *
 		 * */
-		async drawNewNode(node, cssSelectionClass, translate) {
+		async drawNodes(node, cssSelectionClass, translate) {
 			let vm = this;
 
+			// this.graph.select(".node").remove();
+			let nodes = node.descendants();
 			let updateNodes = vm.graph
 				.selectAll(`.${cssSelectionClass}`)
-				.data(node.descendants());
+				.data(nodes, node => node.data.id);
 
 			const enterNode = updateNodes
 				.enter()
@@ -166,6 +171,10 @@ export default {
 					return d.data.id;
 				})
 				.attr("class", cssSelectionClass);
+
+			if (cssSelectionClass != "node") {
+				enterNode.attr("class", "node");
+			}
 
 			enterNode
 				.append("circle")
@@ -191,17 +200,12 @@ export default {
 				await enterNode
 					.merge(updateNodes)
 					.transition()
-					.delay(vm.animationTimePrimary)
-					.transition()
 					.duration(vm.animationTimePrimary)
 					.attr("transform", function(d) {
 						return `translate(${d.x},${d.y})`;
 					})
 					.end();
 			}
-
-			updateNodes.select("text").text(d => d.data.key);
-			updateNodes.exit().remove();
 		},
 		/**
 		 * This method draws links between various nodes given all the parameters. Both the parameters
@@ -223,16 +227,14 @@ export default {
 		 * @param node This can be a single parent node (for example root node) or an array of nodes.
 		 * @selectionString This can be either null or a string that can be used to query DOM (for example classes, elements and ids)
 		 */
-		async drawNewLink(node, selectionString) {
-			let vm = this;
+		async drawLinks(node, selectionString) {
 			debugger;
-
+			let vm = this;
 			let links = node.descendants().slice(1);
-
 			const updateLinks = d3
 				.select(".aa-graph")
 				.selectAll(selectionString)
-				.data(links);
+				.data(links, node => node.data.id);
 			let enterLinks = updateLinks
 				.enter()
 				.append("line")
@@ -259,8 +261,6 @@ export default {
 			await enterLinks
 				.merge(updateLinks)
 				.transition()
-				.delay(1000)
-				.transition(1000)
 				.duration(1000)
 				.attr("x1", d => {
 					return d.parent.x;
@@ -281,6 +281,58 @@ export default {
 		},
 		getNodeId(node) {
 			return `node-${node.data.data}-depth-${node.depth}`;
+		},
+
+		async traverse(nodes, fadeOutAtEnd) {
+			let vm = this;
+
+			let currentNode = nodes[0];
+			let outerRing = this.graph
+				.append("circle")
+				.attr("id", "aa-selection-ring")
+				.style("opacity", "0")
+				.attr("cx", currentNode.x) //TODO: 50 is the actual transaction of the svg. Make this a variable
+				.attr("cy", currentNode.y) //TODO: 50 is the actual transaction of the svg. Make this a variable
+				.attr("r", vm.nodeRadius + vm.nodeStrokeWidth)
+				.attr("fill", "none")
+				.attr("stroke-width", `${vm.nodeStrokeWidth + 1}px`)
+				.attr("stroke", vm.nodeStrokeColorHilighted);
+
+			await outerRing
+				.transition()
+				.ease(d3.easeLinear)
+				.duration(this.animationTime600)
+				.style("opacity", "1")
+				.end();
+
+			for (const node of nodes.splice(1)) {
+				await this.goToNode(node.x, node.y);
+				currentNode = node;
+			}
+
+			if (fadeOutAtEnd) {
+				this.fadeOutRing();
+			}
+			return currentNode;
+		},
+		goToNode(x, y) {
+			return this.graph
+				.select("#aa-selection-ring")
+				.transition()
+				.duration(this.animationTime800)
+				.attr("cx", x)
+				.attr("cy", y)
+				.end();
+		},
+		fadeOutRing() {
+			this.graph
+				.select("#aa-selection-ring")
+				.transition()
+				.duration(this.animationTime600)
+				.style("opacity", 0)
+				.transition()
+				.delay(this.animtionTime400)
+				.remove();
 		}
 	},
 	mounted: function() {
