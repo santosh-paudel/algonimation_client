@@ -95,9 +95,7 @@ class BST {
     // exists, it's parent is returned. If the node does not
     // exist, a candidate-parent node is returned
     getParentNode(key, id) {
-        if (this.root === null) return null;
-
-        if (this.root.left === null && this.root.right === null) return this.root;
+        if (this.root === null || (this.root.left === null && this.root.right === null)) return null;
 
         return this._searchParentNode(this.root, key, id);
     }
@@ -105,11 +103,13 @@ class BST {
     _searchParentNode(parent, key, id) {
 
         if (key <= parent.key) {
-            if (parent.left === null || key === parent.left.key) return parent;
+            // compare by key for data
+            // compare by id if there are multiple nodes with same key
+            if (parent.left === null || (key === parent.left.key && id === parent.left.id)) return parent;
 
             return this._searchParentNode(parent.left, key, id);
         } else {
-            if (parent.right === null || key === parent.right.key) return parent;
+            if (parent.right === null || (key === parent.right.key && id === parent.right.id)) return parent;
 
             return this._searchParentNode(parent.right, key, id);
         }

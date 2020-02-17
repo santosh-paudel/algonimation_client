@@ -7,15 +7,15 @@
 		<b-row class="aa-config-row">
 			<b-col sm="2">
 				<b-row class="container mt-4 ml-4">
-					<b-col sm="6" class="pr-sm-0">
+					<b-col sm="8" class="pr-sm-0">
 						<b-form-input
 							id="aa-new-number"
-							placeholder="E.g. 5"
+							placeholder="5"
 							:state="insertError ? false : null"
 							v-model="newNumber"
 						></b-form-input>
 					</b-col>
-					<b-col sm="6" class="text-left">
+					<b-col sm="4" class="text-left">
 						<b-button squared variant="outline-info" @click="insert"
 							>Insert</b-button
 						>
@@ -24,15 +24,15 @@
 			</b-col>
 			<b-col sm="2">
 				<b-row class="container mt-4 ml-4">
-					<b-col sm="6" class="pr-sm-0">
+					<b-col sm="8" class="pr-sm-0">
 						<b-form-input
 							id="aa-remove-number"
-							placeholder="E.g. 5"
+							placeholder="5"
 							:state="removeError ? false : null"
 							v-model="removeNumber"
 						></b-form-input>
 					</b-col>
-					<b-col sm="6" class="text-left">
+					<b-col sm="4" class="text-left">
 						<b-button
 							squared
 							variant="outline-danger"
@@ -137,14 +137,14 @@ export default {
 				await this.traverse(ancestors, false);
 
 				await this.drawNodes(node, "node", true);
-				await this.drawLinks(node.parent, ".link");
+				await this.drawLinks(node.parent, "link");
 				await this.goToNode(node.x, node.y);
 				this.fadeOutRing();
 			}
 
 			// this.graph.select(`.${nodeId}`).remove();
 			this.drawNodes(this.bstD3Wrapper.tree(true), "node", true);
-			this.drawLinks(this.bstD3Wrapper.tree(false), ".link");
+			this.drawLinks(this.bstD3Wrapper.tree(false), "link");
 
 			this.newNumber = "";
 			this.insertError = false;
@@ -152,8 +152,16 @@ export default {
 		remove: function(data) {},
 
 		/**
-		 * Draws nodes using the specified selection String.
+		 * Draws nodes using the specified cssSelectionClass string. A node
+		 * is a group that contains a circle and a text inside the circle. The text
+		 * represents the key of the node.
 		 *
+		 * @param node Object - A Node object as represented in d3 tree hierarchy. This can be a root/parent node (in which case
+		 * all the descendant nodes are also drawn). This can also be a single node, in which case the single node is drawn
+		 * @param cssSelectionClass String - CSS class that should be used to select the existing
+		 *      node to update. Note: All the existing nodes are updated before binding a new node
+		 * @param translate Boolean - All the nodex of x and y value, which represent where the nodes should end up in the screen. If true,
+		 * the node will be translated to that x and y position
 		 * */
 		async drawNodes(node, cssSelectionClass, translate) {
 			let vm = this;
@@ -178,8 +186,6 @@ export default {
 
 			enterNode
 				.append("circle")
-				// .attr("cx", vm.rootOffsetX)
-				// .attr("cy", vm.rootOffsetY)
 				.attr("r", vm.nodeRadius)
 				.attr("stroke", vm.nodeStrokeColorDefault)
 				.attr("stroke-width", `${vm.nodeStrokeWidth}px`)
@@ -194,8 +200,6 @@ export default {
 				.attr("transform", `translate(0, 7)`)
 				.text(d => d.data.key);
 
-			//This should happen to all new and old nodes
-
 			if (translate) {
 				await enterNode
 					.merge(updateNodes)
@@ -208,32 +212,20 @@ export default {
 			}
 		},
 		/**
-		 * This method draws links between various nodes given all the parameters. Both the parameters
-		 * can have conditional values, i.e. The first parameter, node, can either be an array or a single parent node
-		 * such as root node.
-		 * 1. If node is an array
-		 * 		If node is an array, a link is drawn between each item in the array in increasing order of their index.
-		 * 		For example: if node = [node1, node2, node3], a link is drawn a such node1 ---> node2 ---> node3
-		 * 2. If the node is an object (i.e a parent node)
-		 * 		If node is a parent node, a link is drawn between all it's descendants (including itself)
+		 * This method draws a links between each descendant node of the given node in the parameter and it's parent.
+		 * For example, if the given node is Node(5) which has a left child Node(4), and Node(4) has a left child Node(3), a link is
+		 * drawn between Node(5) and Node(4), another between Node(4) and Node(3)
 		 *
-		 * The second parameter, selectionString can be either null or a string that can be used to query the DOM
-		 * 	1. If selectionString is null:
-		 * 		If the selectionString is null, it almost always means a new link is drawn (as opposed to updating the link).
-		 * 		In such cases, selectionString is assigned a unique id which is derived based on nodes that form the link.
-		 * 2. If selectionString is not null
-		 * 		In this case, it almost always means existing links are being updated.
-		 *
-		 * @param node This can be a single parent node (for example root node) or an array of nodes.
-		 * @selectionString This can be either null or a string that can be used to query DOM (for example classes, elements and ids)
+		 * @param node Object - The parent node from where the links should be drawn
+		 * @cssSelectionClass String - css class that should be used to query the existing link to update. This class
+		 * is also assigned to all the new links that are drawn
 		 */
-		async drawLinks(node, selectionString) {
-			debugger;
+		async drawLinks(node, cssSelectionClass) {
 			let vm = this;
 			let links = node.descendants().slice(1);
 			const updateLinks = d3
 				.select(".aa-graph")
-				.selectAll(selectionString)
+				.selectAll(`.${cssSelectionClass}`)
 				.data(links, node => node.data.id);
 			let enterLinks = updateLinks
 				.enter()
@@ -241,7 +233,7 @@ export default {
 				.attr("id", function(d) {
 					return vm.getLinkId(d.parent, d);
 				})
-				.attr("class", "link")
+				.attr("class", cssSelectionClass)
 				.attr("fill", "none")
 				.attr("stroke", "#aaa")
 				.attr("stroke-color", vm.nodeStrokeColorDefault)
@@ -261,7 +253,7 @@ export default {
 			await enterLinks
 				.merge(updateLinks)
 				.transition()
-				.duration(1000)
+				.duration(this.animationTime800)
 				.attr("x1", d => {
 					return d.parent.x;
 				})

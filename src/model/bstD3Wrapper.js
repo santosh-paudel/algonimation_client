@@ -11,6 +11,9 @@ class BstD3Wrapper {
 
     bst = null;
 
+    // Length of the link between two nodes
+    linkLength = 180;
+
     // This object keeps track of the order of each node that is inserted
     // The key will be the id of the node and the value of Date.now()
 
@@ -20,7 +23,8 @@ class BstD3Wrapper {
 
     constructor(width, height) {
         this.cartisanWidth = width;
-        this.cartisanHeight = height;
+        this.cartisanHeight = height
+
         this.treeLayout = d3.tree().size([this.cartisanWidth, this.cartisanHeight]);
         this.bst = new BST();
     }
@@ -40,11 +44,29 @@ class BstD3Wrapper {
             if (index === 0) return;
 
             //If the node does not have a sibling on the right, move it slightly to the left
+            if (node.parent.data.right === null) {
+                node.x -= 50;
+            } else if (node.parent.data.left === null) {
+                node.x += 50;
+            }
 
             if (node.y - node.parent.y > 180) node.y = node.parent.y + 180;
 
         });
 
+    }
+
+    /**
+     * This method resizes the layout of the tree by assigning new
+     * width and height to the layout
+     * @param {Integer} width 
+     * @param {Integer} height 
+     */
+    resizeLayout(width, height) {
+
+        this.cartisanWidth = width;
+        this.cartisanHeight = height
+        this.treeLayout = d3.tree().size([this.cartisanWidth, this.cartisanHeight]);
     }
 
     tree(rebuild) {
@@ -60,7 +82,6 @@ class BstD3Wrapper {
         if (this.d3Tree === null) {
             return this.tree(true);
         }
-
 
         // Now get the leaf node with the same id
         let parentBstNode = this.bst.getParentNode(data, id);
@@ -79,12 +100,12 @@ class BstD3Wrapper {
         }
 
         if (newD3Node.data.key <= d3ParentNode.data.key) {
-            newD3Node.x = (d3ParentNode.x - 100);
+            newD3Node.x = (d3ParentNode.x - 50);
             let children = d3ParentNode.children || [];
             d3ParentNode.children = [newD3Node].concat(children);
 
         } else {
-            newD3Node.x = (d3ParentNode.x + 100);
+            newD3Node.x = (d3ParentNode.x + 50);
             let children = d3ParentNode.children || [];
             d3ParentNode.children = children.concat([newD3Node]);
         }
