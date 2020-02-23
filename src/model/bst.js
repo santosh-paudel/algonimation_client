@@ -175,7 +175,11 @@ class BST {
         let targetNode = null;
         let successorNode = null;
 
-        if (parentNode.left !== null && parentNode.left.key === key && parentNode.left.id === id) {
+        // If the key and id belong to the root node, parentNode is going to be null
+
+        if (parentNode === null) {
+            targetNode = this.root;
+        } else if (parentNode.left !== null && parentNode.left.key === key && parentNode.left.id === id) {
             targetNode = parentNode.left;
         } else {
             targetNode = parentNode.right;
@@ -200,6 +204,7 @@ class BST {
                 }
             }
         }
+
         return {
             parent: parentNode,
             target: targetNode,
@@ -222,11 +227,14 @@ class BST {
 
     //TODO: Make this function more efficient
     deleteNode(removalNodeKey, removalNodeId, successorKey, successorId) {
-        debugger;
+
         let parentNode = this.getParentNode(removalNodeKey, removalNodeId);
 
         let removalNode = null;
-        if (parentNode.left != null && parentNode.left.id === removalNodeId) {
+        //If parent node is null, we know it is the root node
+        if (parentNode === null) {
+            removalNode = this.root;
+        } else if (parentNode.left != null && parentNode.left.id === removalNodeId) {
             removalNode = parentNode.left;
         } else {
             removalNode = parentNode.right;
@@ -258,10 +266,18 @@ class BST {
 
         }
 
-        if (removalNodeKey <= parentNode.key) {
-            parentNode.left = successorNode;
-        } else {
-            parentNode.right = successorNode;
+        //If the parent of the removal node exists, you must
+        //also change the parent's left and right child
+        if (parentNode !== null) {
+            if (removalNodeKey <= parentNode.key) {
+                parentNode.left = successorNode;
+            } else {
+                parentNode.right = successorNode;
+            }
+        }
+        //Otherwise, the parent node must be the root node
+        else {
+            this.root = successorNode;
         }
 
     }

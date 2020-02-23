@@ -28,6 +28,13 @@ class BstD3Wrapper {
     }
 
     _buildTree() {
+
+        //If the root of the binary search tree is null, no tree can be built
+        if (this.bst.root === null) {
+            this.d3Tree = null;
+            return;
+        }
+
         let hierarchy = d3.hierarchy(this.bst.root, data => {
             return data.children();
         });
@@ -142,10 +149,13 @@ class BstD3Wrapper {
     }
 
     findSuccessor(key, id) {
-        let successorNode = this.bst.findSuccessor(key, id).successor;
+        let successorBstNode = this.bst.findSuccessor(key, id).successor;
+
+        if (successorBstNode === null) return null;
+
         let d3Node = null;
         for (const node of this.d3Tree.descendants()) {
-            if (node.data.key === successorNode.key && node.data.id === successorNode.id) {
+            if (node.data.key === successorBstNode.key && node.data.id === successorBstNode.id) {
                 d3Node = node;
                 break;
             }

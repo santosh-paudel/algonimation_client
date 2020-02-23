@@ -1,44 +1,27 @@
+
 <!--Notes to myself:
 1. Do not call d3.hierarchy in update function. It is expensive. Instead add data to hierarchy the moment a new number is entered. And,
     make data[] a hieararchical data in data function
 2. -->
 <template>
-    <div class="aa-container container-fluid pl-0 pr-0">
-        <b-row class="aa-config-row">
-            <b-col sm="2">
-                <b-row class="container mt-4 ml-4">
-                    <b-col sm="8" class="pr-sm-0">
-                        <b-form-input
-                            id="aa-new-number"
-                            placeholder="5"
-                            :state="insertError ? false : null"
-                            v-model="insertInput"
-                        ></b-form-input>
-                    </b-col>
-                    <b-col sm="4" class="text-left">
-                        <b-button squared variant="outline-info" @click="insert">Insert</b-button>
-                    </b-col>
-                </b-row>
-            </b-col>
-            <b-col sm="2">
-                <b-row class="container mt-4 ml-4">
-                    <b-col sm="8" class="pr-sm-0">
-                        <b-form-input
-                            id="aa-remove-number"
-                            placeholder="5"
-                            :state="removeError ? false : null"
-                            v-model="removeInput"
-                        ></b-form-input>
-                    </b-col>
-                    <b-col sm="4" class="text-left">
-                        <b-button squared variant="outline-danger" @click="remove">Remove</b-button>
-                    </b-col>
-                </b-row>
-            </b-col>
-        </b-row>
+    <div class="container-fluid h-100 pt-sm-3 pb-sm-3">
+        <div class="row justify-content-center h-100">
+            <div class="col-lg-10 col-md-9 col-sm-8 hidden-md-down" id="yellow">
+                <div id="aa-bst-canvas">
+                    <svg :height="canvasHeight" :width="canvasWidth" />
+                </div>
+            </div>
 
-        <div id="aa-bst-canvas">
-            <svg :height="canvasHeight" :width="canvasWidth" />
+            <div class="col-lg-2 col-md-3 col-sm-4 aa-config-col">
+                <b-row>
+                    <hr-with-text text="Control Panel" class="col-sm-12"></hr-with-text>
+                </b-row>
+                <user-input-box inputType="integer" buttonLabel="Insert" @on-user-input="insert"></user-input-box>
+                <b-row>
+                    <hr class="col-sm'12" />
+                </b-row>
+                <user-input-box inputType="integer" buttonLabel="Delete" @on-user-input="remove"></user-input-box>
+            </div>
         </div>
     </div>
 </template>
@@ -46,28 +29,17 @@
 /* eslint-disable no-debugger */
 /* eslint-disable no-unused-vars */
 /* eslinst-disable no-unreachable */
+/* eslint-disable vue/no-unused-components */
 import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
+import { GraphCanvasUtil } from "../util/GraphCanvasUtil";
+import HRWithText from "@/components/HRWithText.vue";
+import UserInputBox from "@/components/UserInputBox.vue";
 const uuidv4 = require("uuid/v4");
 export default {
     name: "BinarySearchTree5",
     data: function() {
         return {
-            //This will contain a number when a user enters a new number to add to the tree.
-            //After adding to the tree, it should be set back to ""
-            insertInput: "",
-
-            //This will contain a number when a user enter a number that should be removed from
-            //the tree. After the number is removed, it should be set back to ""
-            removeInput: "",
-
-            //true if the user entered wrong input
-            insertError: false,
-
-            //This will be set to true if the user tries to remove a data that does not
-            //exist in the tree
-            removeError: false,
-
             //********* Configurations */
 
             fontSize: "20px",
@@ -83,8 +55,6 @@ export default {
             animationTimePrimary: 1000 * 0.5,
             animationTime800: 800 * 0.5,
             animationTime600: 600 * 0.5,
-            animtionTime400: 400 * 0.5,
-            animationTime200: 200 * 0.5,
 
             nodeStrokeColorHilighted: "#AB0505",
             orange: "#F45D27"
@@ -111,11 +81,7 @@ export default {
             //create a tree generator and specify the size of the digram
         },
 
-        insert: async function() {
-            let inputInt = this.sanitizeInput(this.insertInput);
-
-            if (inputInt === null) return;
-
+        insert: async function(inputInt) {
             let nodeId = `node-${uuidv4()}`;
 
             // await this.insertNodeToTree(this.insertInput);
@@ -131,17 +97,33 @@ export default {
                     node.data.id
                 );
                 const ringId = "aa-selection-ring";
-                await this.traverse(
+                // await this.traverse(
+                //     ancestors,
+                //     false,
+                //     ringId,
+                //     this.nodeStrokeColorHilighted
+                // );
+                await GraphCanvasUtil.traverseCircularNodes(
                     ancestors,
+                    this.graph,
                     false,
                     ringId,
-                    this.nodeStrokeColorHilighted
+                    this.nodeStrokeColorHilighted,
+                    this.animationTime800
                 );
 
                 await this.drawNodes(node, "node", true);
                 await this.drawLinks(node.parent, "link", false);
-                await this.goToNode(node.x, node.y, ringId);
-                this.fadeOutRing(ringId);
+                await GraphCanvasUtil.moveCircularNodeById(
+                    ringId,
+                    node.x,
+                    node.y,
+                    this.animationTime800
+                );
+                GraphCanvasUtil.removeElementById(
+                    ringId,
+                    this.animationTime600
+                );
             }
 
             this.drawTree();
@@ -150,11 +132,7 @@ export default {
             this.insertError = false;
         },
 
-        remove: async function() {
-            let inputInt = this.sanitizeInput(this.removeInput);
-
-            if (inputInt === null) return;
-
+        remove: async function(inputInt) {
             let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
 
             // If there are no nodes in the path to the node that should be removed
@@ -163,11 +141,21 @@ export default {
 
             // Traverse to the node to be removed so the user can see the visual
             // traversal
-            await this.traverse(
+            // await this.traverse(
+            //     nodes,
+            //     true,
+            //     "aa-selection-ring",
+            //     this.nodeStrokeColorHilighted
+            // );
+
+            const removalNodeSelectionRingId = "aa-selection-ring";
+            await GraphCanvasUtil.traverseCircularNodes(
                 nodes,
-                true,
-                "aa-selection-ring",
-                this.nodeStrokeColorHilighted
+                this.graph,
+                false,
+                removalNodeSelectionRingId,
+                this.nodeStrokeColorHilighted,
+                this.animationTime800
             );
 
             let removalNode = nodes[nodes.length - 1];
@@ -179,16 +167,17 @@ export default {
             if (successorNode !== null) {
                 let successorPath = removalNode.path(successorNode);
 
-                // traverse to the successor from the removal node
-                await this.traverse(
+                await GraphCanvasUtil.traverseCircularNodes(
                     successorPath,
+                    this.graph,
                     true,
                     "successor-path-ring",
-                    this.orange
+                    this.orange,
+                    this.animationTime800
                 );
 
                 // Remove the link that connect the successor node to it's parent
-                await this.removeElement(
+                await GraphCanvasUtil.removeElementById(
                     this.getLinkId(successorNode),
                     this.animationTime600
                 );
@@ -205,51 +194,34 @@ export default {
                     );
             }
 
+            //Remove the selection ring surrounding the removal node
+            await GraphCanvasUtil.removeElementById(
+                removalNodeSelectionRingId,
+                0
+            );
+
             // Now remove the removalNode from DOM. Note, this does not
             // actually remove the node from the tree.
-            this.removeElement(removalNode.data.id, 0);
+            await GraphCanvasUtil.removeElementById(
+                removalNode.data.id,
+                this.animationTime800
+            );
 
             //Now swap the removal node and successor node
-            debugger;
+
             this.bstD3Wrapper.deleteNode(removalNode, successorNode);
 
-            debugger;
             this.drawTree();
-
-            //Remove the node
-            // this.removeElement(removalNode.data.id, this.animationTime600);
-
-            //Remove the link
-            // this.removeElement(
-            //     this.getLinkId(removalNode),
-            //     this.animationTime600
-            // );
-
-            // debugger;
-            //Now, remove the node from the actual tree itself
-            // if (removalNode !== null) {
-            //     this.bstD3Wrapper.removeNode(
-            //         removalNode.data.key,
-            //         removalNode.data.id
-            //     );
-            //     this.drawTree();
-            // }
         },
 
         drawTree: async function() {
             // this.graph.select(`.${nodeId}`).remove();
-            this.drawNodes(this.bstD3Wrapper.tree(true), "node", true);
-            this.drawLinks(this.bstD3Wrapper.tree(false), "link", true);
-        },
-
-        sanitizeInput: function(data) {
-            if (data === "") {
-                this.insertError = true;
-                return null;
+            let bstD3Tree = this.bstD3Wrapper.tree(true);
+            if (bstD3Tree !== null) {
+                this.drawNodes(bstD3Tree, "node", true);
+                this.drawLinks(bstD3Tree, "link", true);
             }
-            return parseInt(data);
         },
-
         /**
          * Draws nodes using the specified cssSelectionClass string. A node
          * is a group that contains a circle and a text inside the circle. The text
@@ -378,79 +350,6 @@ export default {
         },
         getLinkId: function(node) {
             return `link-${node.data.id}`;
-        },
-
-        /**
-         * This method creates a traversal animation from the first index
-         * of nodes (which is an array) to the last index.
-         *
-         * @param nodes Array of nodes for which traversal animation should
-         * be created
-         */
-        async traverse(nodes, fadeOutAtEnd, selectionId, ringColor) {
-            let vm = this;
-
-            let currentNode = nodes[0];
-            let outerRing = this.graph
-                .append("circle")
-                .attr("id", selectionId)
-                .style("opacity", "0")
-                .attr("cx", currentNode.x) //TODO: 50 is the actual transaction of the svg. Make this a variable
-                .attr("cy", currentNode.y) //TODO: 50 is the actual transaction of the svg. Make this a variable
-                .attr("r", vm.nodeRadius + vm.nodeStrokeWidth)
-                .attr("fill", "none")
-                .attr("stroke-width", `${vm.nodeStrokeWidth + 1}px`)
-                .attr("stroke", ringColor);
-
-            await outerRing
-                .transition()
-                .ease(d3.easeLinear)
-                .duration(this.animationTime600)
-                .style("opacity", "1")
-                .end();
-
-            // Note: Do not use nodes.splice(1) to iterate
-            // through the nodes as it modified the original
-            // nodes array
-            for (let i = 1; i < nodes.length; i++) {
-                const node = nodes[i];
-                await this.goToNode(node.x, node.y, selectionId);
-                currentNode = node;
-            }
-
-            if (fadeOutAtEnd) {
-                this.fadeOutRing(selectionId);
-            }
-            return currentNode;
-        },
-        goToNode(x, y, selectionId) {
-            return this.graph
-                .select(`#${selectionId}`)
-                .transition()
-                .duration(this.animationTime800)
-                .attr("cx", x)
-                .attr("cy", y)
-                .end();
-        },
-        fadeOutRing(selectionId) {
-            this.graph
-                .select(`#${selectionId}`)
-                .transition()
-                .duration(this.animationTime600)
-                .style("opacity", 0)
-                .transition()
-                .delay(this.animtionTime400)
-                .remove();
-        },
-        removeElement: async function(id, transitionTime) {
-            await this.graph
-                .select(`#${id}`)
-                .transition()
-                .duration(transitionTime)
-                .style("opacity", 0)
-                .end();
-
-            this.graph.select(`#${id}`).remove();
         }
     },
     mounted: function() {
@@ -496,16 +395,36 @@ export default {
         let treeWidth = this.canvasWidth - this.padding - this.nodeRadius - 2; //2 is for stroke width
         let treeHeight = this.canvasHeight - this.padding - this.nodeRadius - 2; //2 is for stroke height
         this.bstD3Wrapper = new BstD3Wrapper(treeWidth, treeHeight);
+    },
+    components: {
+        "hr-with-text": HRWithText,
+        "user-input-box": UserInputBox
     }
 };
 </script>
 <style scoped>
 .aa-container {
     width: 100%;
+    height: 100%;
+    padding: 1%;
 }
 
-.aa-config-row {
+/* .aa-config-row {
     height: 100px;
     border-bottom: 1px solid #f14a60;
+} */
+
+.aa-config-col {
+    border-left: 1px solid #f14a60;
+}
+
+hr {
+    border: 0;
+    clear: both;
+    display: block;
+    width: 96%;
+    background-color: #ffff00;
+    background-color: gray;
+    height: 1px;
 }
 </style>
