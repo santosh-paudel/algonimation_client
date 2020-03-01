@@ -7,7 +7,11 @@
 		<div class="row justify-content-center h-100">
 			<div class="col-lg-9 col-md-8 col-sm-7 hidden-md-down" id="yellow">
 				<div id="aa-bst-canvas">
-					<svg :height="canvasHeight" :width="canvasWidth" />
+					<!-- <svg :height="canvasHeight" :width="canvasWidth" /> -->
+					<drawing-board
+						:initialHeight="canvasHeight"
+						:initialWidth="canvasWidth"
+					></drawing-board>
 				</div>
 			</div>
 
@@ -66,6 +70,7 @@
 import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
 import { GraphCanvasUtil } from "../util/GraphCanvasUtil";
+import DrawingBoard from "@/components/DrawingBoard.vue";
 import HRWithText from "@/components/HRWithText.vue";
 import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "../components/RangeInput";
@@ -477,7 +482,8 @@ export default {
 	components: {
 		"hr-with-text": HRWithText,
 		"user-input-box": UserInputBox,
-		"range-input": RangeInput
+		"range-input": RangeInput,
+		"drawing-board": DrawingBoard
 	}
 };
 </script>
