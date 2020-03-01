@@ -3,6 +3,7 @@ import * as d3 from "d3";
 import {
     BST
 } from "./bst";
+const clonedeep = require('lodash.clonedeep');
 
 class BstD3Wrapper {
     depth = 9999999;
@@ -10,9 +11,6 @@ class BstD3Wrapper {
     d3Tree = null;
 
     bst = null;
-
-    // Length of the link between two nodes
-    linkLength = 180;
 
     // This object keeps track of the order of each node that is inserted
     // The key will be the id of the node and the value of Date.now()
@@ -66,6 +64,7 @@ class BstD3Wrapper {
     resizeLayout(width, height) {
         this.cartisanWidth = width;
         this.cartisanHeight = height;
+        debugger;
         this.treeLayout = d3.tree().size([this.cartisanWidth, this.cartisanHeight]);
     }
 
@@ -148,26 +147,50 @@ class BstD3Wrapper {
         return this.tree(true);
     }
 
-    findSuccessor(key, id) {
-        let successorBstNode = this.bst.findSuccessor(key, id).successor;
+    // findSuccessor(key, id) {
+    //     let successorBstNode = this.bst.findSuccessor(key, id).successor;
 
-        if (successorBstNode === null) return null;
+    //     if (successorBstNode === null) return null;
 
-        let d3Node = null;
-        for (const node of this.d3Tree.descendants()) {
-            if (node.data.key === successorBstNode.key && node.data.id === successorBstNode.id) {
-                d3Node = node;
-                break;
+    //     let d3Node = null;
+    //     for (const node of this.d3Tree.descendants()) {
+    //         if (node.data.key === successorBstNode.key && node.data.id === successorBstNode.id) {
+    //             d3Node = node;
+    //             break;
+    //         }
+    //     }
+
+    //     return d3Node;
+    // }
+
+    // deleteNode(removalNode, successor) {
+    //     const successorKey = successor === null ? null : successor.data.key;
+    //     const successorId = successor === null ? null : successor.data.id;
+    //     this.bst.deleteNode(removalNode.data.key, removalNode.data.id, successorKey, successorId);
+    // }
+
+    deleteNode(d3Node) {
+
+        // eslint-disable-next-line no-unused-vars
+        let d3NodeCopy = clonedeep(d3Node);
+        let d3TreeCopy = clonedeep(this.tree(false));
+        let successorNodeData = this.bst.deleteNode(d3Node.data.key, d3Node.data.id);
+
+        if (successorNodeData !== null) {
+            let removalD3Node = null;
+            for (const node of d3TreeCopy.descendants()) {
+                debugger;
+                if (node.data.id === d3Node.data.id) {
+                    removalD3Node = node;
+                }
+
+                if (node.data.id === successorNodeData.id) {
+                    return removalD3Node.path(node);
+                }
             }
         }
+        return null;
 
-        return d3Node;
-    }
-
-    deleteNode(removalNode, successor) {
-        const successorKey = successor === null ? null : successor.data.key;
-        const successorId = successor === null ? null : successor.data.id;
-        this.bst.deleteNode(removalNode.data.key, removalNode.data.id, successorKey, successorId);
     }
 
     height() {

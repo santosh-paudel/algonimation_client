@@ -1,33 +1,53 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-debugger */
 "use strict";
+const uuidv4 = require("uuid/v4");
 class Node {
-    id = null;
-    key = null;
-    left = null;
-    right = null;
+    _id = null;
+    _key = null;
+    _left = null;
+    _right = null;
 
     constructor(data, id) {
-        this.id = id;
-        this.key = data;
-        this.left = null;
-        this.right = null;
+        this._id = id;
+        this._key = data;
+        this._left = null;
+        this._right = null;
     }
     set left(node) {
-        this.left = node;
+        this._left = node;
     }
     set right(node) {
-        this.right = node;
+        this._right = node;
     }
     get left() {
-        return this.left;
+        return this._left;
     }
     get right() {
-        return this.right;
+        return this._right;
     }
 
     get key() {
-        return this.key;
+        return this._key;
+    }
+
+    get id() {
+        return this._id;
+    }
+
+    set key(key) {
+        this._key = key;
+    }
+
+    set id(id) {
+        this._id = id;
+    }
+
+    get data() {
+        return {
+            key: this.key,
+            id: this.id
+        }
     }
 
     children() {
@@ -37,6 +57,18 @@ class Node {
         if (this.right !== null) children.push(this.right);
 
         return children;
+    }
+
+    /**
+     * Returns a child with the given key and id if any
+     * @param {} key 
+     * @param {*} id 
+     */
+    child(key, id) {
+        if (key <= this.key) {
+            return this.left;
+        }
+        return this.right;
     }
 }
 class BST {
@@ -111,11 +143,15 @@ class BST {
     // exists, it's parent is returned. If the node does not
     // exist, a candidate-parent node is returned
     getParentNode(key, id) {
-        if (
-            this.root === null ||
-            (this.root.left === null && this.root.right === null)
-        )
-            return null;
+        // if (
+        //     this.root === null ||
+        //     (this.root.left === null && this.root.right === null)
+        // )
+        //     return null;
+
+        if (this.root === null) return null;
+        if (this.root, key === key && this.root.id === id) return null;
+        // else if(this.left )
 
         return this._searchParentNode(this.root, key, id);
     }
@@ -143,7 +179,7 @@ class BST {
     }
 
 
-    _inorderSuccessor(node) {
+    _getMinValNode(node) {
         let minValueNode = node;
         let nextSmallNode = node;
         while (nextSmallNode.left !== null) {
@@ -170,54 +206,55 @@ class BST {
     }
 
 
-    findSuccessor(key, id) {
-        let parentNode = this.getParentNode(key, id);
-        let targetNode = null;
-        let successorNode = null;
+    // findSuccessor(key, id) {
+    //     debugger;
+    //     let parentNode = this.getParentNode(key, id);
+    //     let targetNode = null;
+    //     let successorNode = null;
 
-        // If the key and id belong to the root node, parentNode is going to be null
+    //     // If the key and id belong to the root node, parentNode is going to be null
 
-        if (parentNode === null) {
-            targetNode = this.root;
-        } else if (parentNode.left !== null && parentNode.left.key === key && parentNode.left.id === id) {
-            targetNode = parentNode.left;
-        } else {
-            targetNode = parentNode.right;
-        }
+    //     if (parentNode === null) {
+    //         targetNode = this.root;
+    //     } else if (parentNode.left !== null && parentNode.left.key === key && parentNode.left.id === id) {
+    //         targetNode = parentNode.left;
+    //     } else {
+    //         targetNode = parentNode.right;
+    //     }
 
-        //If the node to remove has no children
-        if (targetNode.children().length === 0) {
-            successorNode = null;
-        }
+    //     //If the node to remove has no children
+    //     if (targetNode.children().length === 0) {
+    //         successorNode = null;
+    //     }
 
-        //If the node to remove has one child
-        else if (targetNode.children().length === 1) {
-            successorNode = targetNode.children()[0];
-        } else {
-            let collector = [];
-            this._preorderTraversal(this.root, collector);
+    //     //If the node to remove has one child
+    //     else if (targetNode.children().length === 1) {
+    //         successorNode = targetNode.children()[0];
+    //     } else {
+    //         let collector = [];
+    //         this._preorderTraversal(this.root, collector);
 
-            for (let i = 0; i < collector.length; i++) {
-                const node = collector[i];
-                if (node.key === key && node.id === id) {
-                    successorNode = collector[i + 1];
-                }
-            }
-        }
+    //         for (let i = 0; i < collector.length; i++) {
+    //             const node = collector[i];
+    //             if (node.key === key && node.id === id) {
+    //                 successorNode = collector[i + 1];
+    //             }
+    //         }
+    //     }
 
-        return {
-            parent: parentNode,
-            target: targetNode,
-            successor: successorNode
-        }
-    }
+    //     return {
+    //         parent: parentNode,
+    //         target: targetNode,
+    //         successor: successorNode
+    //     }
+    // }
 
-    _preorderTraversal(node, collector) {
-        if (node === null) return null;
-        this._preorderTraversal(node.left, collector);
-        collector.push(node);
-        this._preorderTraversal(node.right, collector);
-    }
+    // _preorderTraversal(node, collector) {
+    //     if (node === null) return null;
+    //     this._preorderTraversal(node.left, collector);
+    //     collector.push(node);
+    //     this._preorderTraversal(node.right, collector);
+    // }
 
     /**
      * Swaps nodes 
@@ -226,90 +263,106 @@ class BST {
      */
 
     //TODO: Make this function more efficient
-    deleteNode(removalNodeKey, removalNodeId, successorKey, successorId) {
+    deleteNode(key, id) {
 
-        let parentNode = this.getParentNode(removalNodeKey, removalNodeId);
+        // let parentNode = this.getParentNode(removalNodeKey, removalNodeId);
 
-        let removalNode = null;
-        //If parent node is null, we know it is the root node
-        if (parentNode === null) {
-            removalNode = this.root;
-        } else if (parentNode.left != null && parentNode.left.id === removalNodeId) {
-            removalNode = parentNode.left;
-        } else {
-            removalNode = parentNode.right;
-        }
+        // let removalNode = null;
+        // //If parent node is null, we know it is the root node
+        // if (parentNode === null) {
+        //     removalNode = this.root;
+        // } else if (parentNode.left != null && parentNode.left.id === removalNodeId) {
+        //     removalNode = parentNode.left;
+        // } else {
+        //     removalNode = parentNode.right;
+        // }
 
-        //Since the successor is going to be one of the child nodes of the node
-        // begin searching from this node
-        let successorNode = null;
-        if (successorKey !== null) {
+        const collector = [];
 
-            //Fet the successor Node's parent
-            let successorParentNode = this._searchParentNode(parentNode, successorKey, successorId);
-
-            //Get the successor Node
-            successorNode = this._searchNode(successorParentNode, successorKey, successorId);
-
-            // If the removal node has a left child (or a right child) and that left child  (or right child) is not the successor
-            // itself, it (the child) becomes the left child (or the right child) of the successor
-            successorNode.left = (removalNode.left === null || removalNode.left.id === successorId) ? null : removalNode.left;
-            successorNode.right = (removalNode.right === null || removalNode.right.id === successorId) ? null : removalNode.right;
+        this._deleteNode(this.root, key, id, collector);
 
 
-            //Make sure you set the paren't reference to the successor node to null
-            if (successorParentNode.left !== null && successorParentNode.left.id === successorId) {
-                successorParentNode.left = null;
+
+        return collector.length == 0 ? null : collector[0];
+    }
+
+    _deleteNode(ancestor, key, id, collector) {
+
+        let parent = this.root.id === id ? null : this._searchParentNode(ancestor, key, id);
+        let node = this.root.id === id ? this.root : this._searchNode(parent, key, id);
+        if (node === null)
+            return;
+
+        //Case 1: If the node to be deleted has no children (i.e if it is a leaf node)
+        if (node.left === null && node.right === null) {
+
+            //If the node to be deleted is not a root node, just
+            //set the parent's left or right child to null
+            if (node.id !== this.root.id) {
+                if (parent.left !== null && parent.left.id === node.id) {
+                    parent.left = null;
+                } else {
+                    parent.right = null;
+                }
             } else {
-                successorParentNode.right = null;
+                this.root = null;
             }
 
         }
+        //Case 2 node to be deleted has two children
+        else if (node.children().length === 2) {
+            let successor = this._getMinValNode(node.right);
+            debugger;
 
-        //If the parent of the removal node exists, you must
-        //also change the parent's left and right child
-        if (parentNode !== null) {
-            if (removalNodeKey <= parentNode.key) {
-                parentNode.left = successorNode;
+
+            collector.push(successor);
+
+            const successorParent = this._searchParentNode(node, successor.key, successor.id);
+            this._deleteNode(successorParent, successor.key, successor.id, collector);
+
+            let tempNode = new Node(successor.key, successor.id);
+            if (this.root.id === id) {
+                this.root = tempNode;
             } else {
-                parentNode.right = successorNode;
+
+                //At this point, the left node may have already been removed by the above
+                //this.__deleteNode function call above the if block. So check to see if left is null first
+                if (parent.left !== null && parent.left.id === id) {
+                    parent.left = tempNode;
+                } else {
+                    parent.right = tempNode;
+                }
             }
+            tempNode.left = node.left;
+            tempNode.right = node.right;
+
+            // node.key = successorKey;
         }
-        //Otherwise, the parent node must be the root node
+        //Case 3: node to be deleted has only one child
         else {
-            this.root = successorNode;
+
+            //Get the child of the node to be deleted
+            let childNode = node.left === null ? node.right : node.left;
+            if (node.id === this.root.id) {
+                this.root = childNode;
+
+            } else {
+
+                if (parent.left !== null && parent.left.id === node.id) {
+                    parent.left = childNode;
+                } else {
+                    parent.right = childNode;
+                }
+            }
+
+            collector.push(childNode.data);
+
         }
 
     }
-
-
 }
 
 export {
     Node,
     BST
 };
-
-// function main() {
-//     // let root = new Node(15, 'a');
-
-//     let bst = new BST();
-//     bst.insert(15, 'a');
-//     bst.insert(10, 'b');
-//     bst.insert(30, 'c');
-//     bst.insert(20, 'd');
-//     bst.insert(40, 'e');
-//     bst.insert(25, 'g');
-//     bst.insert(8, 'i');
-//     bst.insert(12, 'j');
-
-//     bst.insert(40, 'k');
-//     bst.insert(35, 'l');
-//     bst.insert(45, 'm');
-
-//     let n = bst.findInorderSuccessor(30, 'c');
-//     console.log(n.key);
-
-// }
-
-// main();

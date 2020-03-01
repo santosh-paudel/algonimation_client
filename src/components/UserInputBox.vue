@@ -9,7 +9,14 @@
             ></b-form-input>
         </div>
         <div class="col-md-6 col-sm-12 mt-1">
-            <b-button block variant="outline-info" @click="onUserInput">{{buttonLabel}}</b-button>
+            <b-button
+                v-if="disableInput"
+                block
+                disabled
+                variant="outline-info"
+                @click="onUserInput"
+            >{{buttonLabel}}</b-button>
+            <b-button v-else block variant="outline-info" @click="onUserInput">{{buttonLabel}}</b-button>
         </div>
     </b-row>
 </template>
@@ -17,7 +24,8 @@
 export default {
     props: {
         inputType: String, //Supported values are "string", "integer"
-        buttonLabel: String //The label that should display in the button
+        buttonLabel: String, //The label that should display in the button
+        disableInput: Boolean
     },
     data: function() {
         return {

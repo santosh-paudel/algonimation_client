@@ -1,6 +1,7 @@
+const clonedeep = require('lodash.clonedeep');
 class ObjectUtil {
     static deepCopy(obj) {
-        return JSON.parse(JSON.stringify(obj))
+        return clonedeep(obj);
     }
 }
 

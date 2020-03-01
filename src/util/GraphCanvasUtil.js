@@ -21,6 +21,7 @@ class GraphCanvasUtil {
     /**
      * This method moves the circle represented by the given id (parameter) to
      * new coordinates (newPosX, newPosY) over the given period of time (transitionTime)
+     * Note: This does not work for group because group does not have a x and y coordinate
      * @param {String} id id of the cicle in DOM that should be moved
      * @param {Integer} newPosX New X coodinate
      * @param {Integer} newPosY New Y coordinate
@@ -35,6 +36,18 @@ class GraphCanvasUtil {
             .duration(transitionTime)
             .attr("cx", newPosX)
             .attr("cy", newPosY)
+            .end();
+    }
+
+    static translateNode(id, translationX, translationY, transitionTime) {
+        return d3
+            .select(`#${id}`)
+            .transition()
+            .duration(transitionTime)
+            .attr(
+                "transform",
+                `translate(${translationX}, ${translationY})`
+            )
             .end();
     }
 
