@@ -62,6 +62,16 @@
 					:disableInput="disableUserInteraction"
 					@on-user-input="userAction($event, 'visit')"
 				></user-input-box>
+				<b-row>
+					<hr-with-text
+						text="Other Operations"
+						class="col-sm-12 mt-2"
+					></hr-with-text>
+				</b-row>
+				<input-data-list
+					:dataList="otherBstOperations"
+					@on-item-selected="userAction($event, 'other operations')"
+				></input-data-list>
 			</div>
 		</div>
 	</div>
@@ -74,6 +84,7 @@ import DrawingBoard from "@/components/DrawingBoard.vue";
 import HRWithText from "@/components/HRWithText.vue";
 import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "../components/RangeInput";
+import InputDataList from "@/components/UIComponents/InputDataList.vue";
 const uuidv4 = require("uuid/v4");
 export default {
 	name: "BinarySearchTree5",
@@ -108,7 +119,9 @@ export default {
 
 			//All the non reactive properties are defined in the created() lifecycle hook
 
-			disableUserInteraction: false
+			disableUserInteraction: false,
+
+			otherBstOperations: ["Inorder Traversal"]
 		};
 	},
 	computed: {
@@ -132,6 +145,9 @@ export default {
 					break;
 				case "visit":
 					await this.visitNode(userInput);
+					break;
+				case "other operations":
+					console.log("other operations");
 					break;
 			}
 
@@ -287,6 +303,9 @@ export default {
 
 		visitNode: async function(inputInt) {
 			let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
+
+			if (nodes.length === 0) return;
+
 			await GraphCanvasUtil.traverseCircularNodes(
 				nodes,
 				this.graph,
@@ -367,7 +386,7 @@ export default {
 				await enterNode
 					.merge(updateNodes)
 					.transition()
-					.duration(vm.animationTimePrimary)
+					.duration(vm.animationTime800)
 					.attr("transform", function(d) {
 						return `translate(${d.x},${d.y})`;
 					})
@@ -483,7 +502,8 @@ export default {
 		"hr-with-text": HRWithText,
 		"user-input-box": UserInputBox,
 		"range-input": RangeInput,
-		"drawing-board": DrawingBoard
+		"drawing-board": DrawingBoard,
+		"input-data-list": InputDataList
 	}
 };
 </script>

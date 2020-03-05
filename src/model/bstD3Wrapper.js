@@ -120,10 +120,12 @@ class BstD3Wrapper {
 
     getPathToNodeByKey(key) {
         let targetNode = null;
-        for (const node of this.tree(false).descendants()) {
-            if (node.data.key === key) {
-                targetNode = node;
-                break;
+        if (this.tree(false) !== null) {
+            for (const node of this.tree(false).descendants()) {
+                if (node.data.key === key) {
+                    targetNode = node;
+                    break;
+                }
             }
         }
         return targetNode === null ? [] : this.d3Tree.path(targetNode);

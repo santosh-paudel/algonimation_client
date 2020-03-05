@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import {
-  BootstrapVue
+  BootstrapVue,
 } from 'bootstrap-vue'
 
 import VueGtag from "vue-gtag";
