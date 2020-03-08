@@ -1,535 +1,462 @@
+
 <!--Notes to myself:
 1. Do not call d3.hierarchy in update function. It is expensive. Instead add data to hierarchy the moment a new number is entered. And,
     make data[] a hieararchical data in data function
 2. -->
 <template>
-	<div class="container-fluid h-100 pb-sm-3">
-		<div class="row justify-content-center h-100">
-			<div class="col-lg-9 col-md-8 col-sm-7 hidden-md-down" id="yellow">
-				<div id="aa-bst-canvas">
-					<!-- <svg :height="canvasHeight" :width="canvasWidth" /> -->
-					<drawing-board
-						:initialHeight="canvasHeight"
-						:initialWidth="canvasWidth"
-					></drawing-board>
-				</div>
-			</div>
+    <div class="container-fluid h-100 pb-sm-3 mt-5">
+        <div class="row justify-content-center h-100">
+            <div class="col-lg-9 col-md-8 col-sm-7 h-100" id="yellow">
+                <div class="d-flex flex-column h-100" style="border: 1px solid rgba(90,90,90, 0.2)">
+                    <div id="aa-bst-canvas" class="h-100">
+                        <drawing-board-fluid
+                            bgcolor="rgba(212, 114, 140, 0.03)"
+                            @on-canvas-ready="onCanvasInit"
+                        ></drawing-board-fluid>
+                    </div>
+                    <eden-space
+                        class="aa-eden-space"
+                        :nodes="edenNodes"
+                        bgcolor="rgba(212, 114, 140, 0.03)"
+                        :style="{height: `${edenHeight}px`}"
+                        @on-clear-eden="onClearEden"
+                    ></eden-space>
+                </div>
+            </div>
 
-			<div class="col-lg-3 col-md-4 col-sm-5 aa-config-col">
-				<p class="mt-2">Control Panel</p>
-				<b-row class="mt-2">
-					<hr-with-text
-						text="Animation Speed"
-						class="col-sm-12"
-					></hr-with-text>
-				</b-row>
-				<range-input
-					@on-value-change="changeAnimationSpeed"
-				></range-input>
-				<b-row>
-					<hr-with-text
-						text="Insert"
-						class="col-sm-12"
-					></hr-with-text>
-				</b-row>
-				<user-input-box
-					inputType="integer"
-					buttonLabel="Insert"
-					:disableInput="disableUserInteraction"
-					@on-user-input="userAction($event, 'insert')"
-				></user-input-box>
-				<b-row>
-					<hr-with-text
-						text="Delete"
-						class="col-sm-12 mt-2"
-					></hr-with-text>
-				</b-row>
-				<user-input-box
-					inputType="integer"
-					buttonLabel="Delete"
-					:disableInput="disableUserInteraction"
-					@on-user-input="userAction($event, 'delete')"
-				></user-input-box>
-				<b-row>
-					<hr-with-text
-						text="Visit"
-						class="col-sm-12 mt-2"
-					></hr-with-text>
-				</b-row>
-				<user-input-box
-					inputType="integer"
-					buttonLabel="Visit"
-					:disableInput="disableUserInteraction"
-					@on-user-input="userAction($event, 'visit')"
-				></user-input-box>
-				<b-row>
-					<hr-with-text
-						text="Other Operations"
-						class="col-sm-12 mt-2"
-					></hr-with-text>
-				</b-row>
-				<input-data-list
-					:dataList="otherBstOperations"
-					@on-item-selected="userAction($event, 'other operations')"
-				></input-data-list>
-			</div>
-		</div>
-	</div>
+            <div class="col-lg-3 col-md-4 col-sm-5 aa-config-col">
+                <p class="mt-2">Control Panel</p>
+                <b-row class="mt-2">
+                    <hr-with-text text="Animation Speed" class="col-sm-12"></hr-with-text>
+                </b-row>
+                <range-input @on-value-change="changeAnimationSpeed"></range-input>
+                <b-row>
+                    <hr-with-text text="Insert" class="col-sm-12"></hr-with-text>
+                </b-row>
+                <user-input-box
+                    inputType="integer"
+                    buttonLabel="Insert"
+                    :disableInput="disableUserInteraction"
+                    @on-user-input="userAction($event, 'insert')"
+                ></user-input-box>
+                <b-row>
+                    <hr-with-text text="Delete" class="col-sm-12 mt-2"></hr-with-text>
+                </b-row>
+                <user-input-box
+                    inputType="integer"
+                    buttonLabel="Delete"
+                    :disableInput="disableUserInteraction"
+                    @on-user-input="userAction($event, 'delete')"
+                ></user-input-box>
+                <b-row>
+                    <hr-with-text text="Visit" class="col-sm-12 mt-2"></hr-with-text>
+                </b-row>
+                <user-input-box
+                    inputType="integer"
+                    buttonLabel="Visit"
+                    :disableInput="disableUserInteraction"
+                    @on-user-input="userAction($event, 'visit')"
+                ></user-input-box>
+                <b-row>
+                    <hr-with-text text="Other Operations" class="col-sm-12 mt-2"></hr-with-text>
+                </b-row>
+                <input-data-list
+                    :dataList="otherBstOperations"
+                    @on-item-selected="userAction($event, $event)"
+                ></input-data-list>
+            </div>
+        </div>
+    </div>
 </template>
 <script>
+/* eslint-disable no-debugger */
+/* eslint-disable no-unused-vars */
 import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
 import { GraphCanvasUtil } from "../util/GraphCanvasUtil";
-import DrawingBoard from "@/components/DrawingBoard.vue";
+import DrawingBoardFluid from "@/components/DrawingBoardFluid.vue";
 import HRWithText from "@/components/HRWithText.vue";
 import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "../components/RangeInput";
 import InputDataList from "@/components/UIComponents/InputDataList.vue";
+import EdenSpace from "@/components/DrawingComponents/EdenSpace.vue";
 const uuidv4 = require("uuid/v4");
 export default {
-	name: "BinarySearchTree5",
-	data: function() {
-		return {
-			//********* Configurations */
+    name: "BinarySearchTree5",
+    data: function() {
+        return {
+            //********* Configurations */
 
-			fontSize: "20px",
-			nodeFillColor: "#FFFFFF",
-			nodeRadius: 30,
-			nodeStrokeColorDefault: "#262626",
-			nodeFontColorDefault: "#262626",
-			nodeFontColorHilighted: "#AB0505",
-			nodeStrokeWidth: 2, //2px
-			rootOffsetX: 0,
-			rootOffsetY: 0,
-			linkLength: 180,
+            fontSize: "20px",
+            nodeFillColor: "#FFFFFF",
+            nodeRadius: 25,
+            edenHeight: 60,
+            nodeStrokeColorDefault: "#262626",
+            nodeFontColorDefault: "#262626",
+            nodeFontColorHilighted: "#AB0505",
+            nodeStrokeWidth: 2,
+            linkLength: 110,
+            animationTimePrimary: 800,
+            nodeStrokeColorHilighted: "#AB0505",
+            orange: "#F45D27",
 
-			animationTimePrimary: 800,
-			animationTime800: 600,
-			animationTime600: 400,
+            //All the non reactive properties are defined in the created() lifecycle hook
 
-			// initial width of the tree. After each subsequent insert and deletes, this should
-			// increase or decrease by widthIncrement value declared below
-			canvasWidth: 600,
+            disableUserInteraction: false,
+            otherBstOperations: [
+                "Inorder Traversal",
+                "Preorder Traversal",
+                "Postorder Traversal"
+            ],
+            edenNodes: []
+        };
+    },
+    methods: {
+        async onClearEden(userInput) {
+            this.edenNodes = [];
+        },
+        async userAction(userInput, actionName) {
+            this.disableUserInteraction = true;
+            //clear eden space before any operations
+            this.edenNodes = [];
+            switch (actionName) {
+                case "insert":
+                    await this.insertNode(userInput);
+                    break;
+                case "delete":
+                    await this.deleteNode(userInput);
+                    break;
+                case "visit":
+                    await this.visitNode(userInput);
+                    break;
+                case "Inorder Traversal":
+                    await this.inorderTraversal();
+                    break;
+                case "Preorder Traversal":
+                    await this.preorderTraversal();
+                    break;
+                case "Postorder Traversal":
+                    await this.postorderTraversal();
+                    break;
+                default:
+                    debugger;
+                    break;
+            }
 
-			// initial width of the tree. After each subsequent insert and deletes, this should
-			// increase or decrease by heightIncrement value declared below
-			canvasHeight: 1000,
-			nodeStrokeColorHilighted: "#AB0505",
-			orange: "#F45D27",
+            this.disableUserInteraction = false;
+        },
 
-			//All the non reactive properties are defined in the created() lifecycle hook
+        changeAnimationSpeed(scale) {
+            this.animationTimePrimary = 1600 * scale;
+            console.log(
+                `Animation speed changed by scale ${scale} to the value of ${this.animationTimePrimary}`
+            );
+        },
 
-			disableUserInteraction: false,
+        insertNode: async function(inputInt) {
+            let nodeId = `node-${uuidv4()}`;
 
-			otherBstOperations: ["Inorder Traversal"]
-		};
-	},
-	computed: {
-		/**
-		 * This method returns the value by which the height of the canvas should increase if the node
-		 * start overflowing towards the bottom.
-		 */
-		canvasHeightIncrement() {
-			return this.linkLength + this.nodeStrokeWidth;
-		}
-	},
-	methods: {
-		async userAction(userInput, actionName) {
-			this.disableUserInteraction = true;
-			switch (actionName) {
-				case "insert":
-					await this.insertNode(userInput);
-					break;
-				case "delete":
-					await this.deleteNode(userInput);
-					break;
-				case "visit":
-					await this.visitNode(userInput);
-					break;
-				case "other operations":
-					console.log("other operations");
-					break;
-			}
+            // await this.insertNodeToTree(this.insertInput);
+            let node = this.bstD3Wrapper.insert(inputInt, nodeId);
 
-			this.disableUserInteraction = false;
-		},
+            //Draw a temporary placeholder node
+            // Note: the class should not be ".node" because otherwise existing node will
+            // be updated
+            let nodeOpt = this.getDefaultNodeOptions();
+            //This node has to be fixed to origin.
+            //When the height of the tree is greater
+            nodeOpt.fixedAtOrigin = true;
+            nodeOpt.removeExitNodes = false;
+            await GraphCanvasUtil.drawCircularNodes(
+                node.descendants(),
+                nodeOpt
+            );
 
-		changeAnimationSpeed(scale) {
-			this.animationTimePrimary = 2000 * scale;
-			this.animationTime800 = 1600 * scale;
-			this.animationTime600 = 1200 * scale;
-			console.log(
-				`animationTimePrimary changed to ${this.animationTimePrimary} by scale ${scale}`
-			);
-		},
+            if (this.bstD3Wrapper.height() > 1) {
+                let ancestors = this.bstD3Wrapper.getPathToParentById(
+                    node.data.id
+                );
+                const ringId = "aa-selection-ring";
+                await GraphCanvasUtil.traverseCircularNodes(
+                    ancestors,
+                    this.graph,
+                    false,
+                    ringId,
+                    this.nodeStrokeColorHilighted,
+                    this.animationTimePrimary
+                );
 
-		/**
-		 * This method initializes the SVG element where the tree will be drawn.
-		 * It uses the configurations defined in data property to assign attributes
-		 * the the SVG container
-		 */
-		init: function() {
-			this.svg = d3.select("svg");
+                //Now, when the height of the tree is greater than 1,
+                // translate the node to it's actual position (Before
+                // this translation, this node is guarenteed to be at origin)
+                await GraphCanvasUtil.translateNode(
+                    node.data.id,
+                    node.x,
+                    node.y,
+                    this.animationTimePrimary
+                );
+                // Draw links between the newly translated node and it's parent
+                let linkOpt = this.getDefaultLinkOptions();
+                linkOpt.removeExitLinks = false;
+                await GraphCanvasUtil.drawLinks(node.descendants(), linkOpt);
 
-			//Create the group that contain the tree. Add a margin to the left
-			//and to the top by translating the group 50 pixelx to the right and pixels down
-			this.graph = this.svg
-				.append("g")
-				.attr("class", "aa-graph")
-				.attr("transform", "translate(50, 50)");
+                //Move the hilighter node (circle) to the newly
+                //translated node
+                await GraphCanvasUtil.moveCircularNodeById(
+                    ringId,
+                    node.x,
+                    node.y,
+                    this.animationTimePrimary
+                );
 
-			//create a tree generator and specify the size of the digram
-		},
+                //Remove the hilighter node
+                GraphCanvasUtil.removeElementById(
+                    ringId,
+                    this.animationTimePrimary
+                );
+            }
 
-		insertNode: async function(inputInt) {
-			let nodeId = `node-${uuidv4()}`;
+            this.drawTree();
+        },
 
-			// await this.insertNodeToTree(this.insertInput);
-			let node = this.bstD3Wrapper.insert(inputInt, nodeId);
+        deleteNode: async function(inputInt) {
+            let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
 
-			//Draw a temporary placeholder node
-			// Note: the class should not be ".node" because otherwise existing node will
-			// be updated
-			await this.drawNodes(node, "node", false);
+            // If there are no nodes in the path to the node that should be removed
+            // no further action can be performed
+            if (nodes.length === 0) return;
 
-			if (this.bstD3Wrapper.height() > 1) {
-				let ancestors = this.bstD3Wrapper.getPathToParentById(
-					node.data.id
-				);
-				const ringId = "aa-selection-ring";
-				await GraphCanvasUtil.traverseCircularNodes(
-					ancestors,
-					this.graph,
-					false,
-					ringId,
-					this.nodeStrokeColorHilighted,
-					this.animationTime800
-				);
+            // Traverse to the node to be removed so the user can see the visual
 
-				await this.drawNodes(node, "node", true);
-				await this.drawLinks(node.parent, "link", false);
-				await GraphCanvasUtil.moveCircularNodeById(
-					ringId,
-					node.x,
-					node.y,
-					this.animationTime800
-				);
-				GraphCanvasUtil.removeElementById(
-					ringId,
-					this.animationTime600
-				);
-			}
+            const removalNodeSelectionRingId = "aa-selection-ring";
 
-			this.drawTree();
+            await GraphCanvasUtil.traverseCircularNodes(
+                nodes,
+                this.graph,
+                false,
+                removalNodeSelectionRingId,
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary
+            );
 
-			this.insertInput = "";
-			this.insertError = false;
-		},
+            //Create a clone of the removal
+            let removalNode = nodes[nodes.length - 1];
 
-		deleteNode: async function(inputInt) {
-			let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
+            let successorPath = this.bstD3Wrapper.deleteNode(removalNode);
 
-			// If there are no nodes in the path to the node that should be removed
-			// no further action can be performed
-			if (nodes.length === 0) return;
+            if (successorPath !== null) {
+                // let successorPath = removalNode.path(successorNode);
+                let successorNode = successorPath[successorPath.length - 1];
 
-			// Traverse to the node to be removed so the user can see the visual
-			// traversal
-			// await this.traverse(
-			//     nodes,
-			//     true,
-			//     "aa-selection-ring",
-			//     this.nodeStrokeColorHilighted
-			// );
+                await GraphCanvasUtil.traverseCircularNodes(
+                    successorPath,
+                    this.graph,
+                    true,
+                    "successor-path-ring",
+                    this.orange,
+                    this.animationTimePrimary
+                );
 
-			const removalNodeSelectionRingId = "aa-selection-ring";
+                // Remove the link that connect the successor node to it's parent
+                await GraphCanvasUtil.removeElementById(
+                    this.getLinkId(successorNode),
+                    this.animationTimePrimary
+                );
 
-			await GraphCanvasUtil.traverseCircularNodes(
-				nodes,
-				this.graph,
-				false,
-				removalNodeSelectionRingId,
-				this.nodeStrokeColorHilighted,
-				this.animationTime800
-			);
+                await GraphCanvasUtil.translateNode(
+                    successorNode.data.id,
+                    removalNode.x,
+                    removalNode.y,
+                    this.animationTimePrimary
+                );
+            }
 
-			//Create a clone of the removal
-			let removalNode = nodes[nodes.length - 1];
+            //Remove the selection ring surrounding the removal node
+            await GraphCanvasUtil.removeElementById(
+                removalNodeSelectionRingId,
+                0
+            );
 
-			let successorPath = this.bstD3Wrapper.deleteNode(removalNode);
+            // Now remove the removalNode from DOM. Note, this does not
+            // actually remove the node from the tree.
+            await GraphCanvasUtil.removeElementById(
+                removalNode.data.id,
+                this.animationTimePrimary
+            );
 
-			if (successorPath !== null) {
-				// let successorPath = removalNode.path(successorNode);
-				let successorNode = successorPath[successorPath.length - 1];
+            this.drawTree();
+        },
 
-				await GraphCanvasUtil.traverseCircularNodes(
-					successorPath,
-					this.graph,
-					true,
-					"successor-path-ring",
-					this.orange,
-					this.animationTime800
-				);
+        visitNode: async function(inputInt) {
+            let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
 
-				// Remove the link that connect the successor node to it's parent
-				await GraphCanvasUtil.removeElementById(
-					this.getLinkId(successorNode),
-					this.animationTime600
-				);
+            if (nodes.length === 0) return;
 
-				await GraphCanvasUtil.translateNode(
-					successorNode.data.id,
-					removalNode.x,
-					removalNode.y,
-					this.animationTime800
-				);
-			}
+            await GraphCanvasUtil.traverseCircularNodes(
+                nodes,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary
+            );
+        },
 
-			//Remove the selection ring surrounding the removal node
-			await GraphCanvasUtil.removeElementById(
-				removalNodeSelectionRingId,
-				0
-			);
+        async inorderTraversal() {
+            let nodeIds = this.bstD3Wrapper.inorderTraversal();
+            await GraphCanvasUtil.traverseCircularNodesById(
+                nodeIds,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
 
-			// Now remove the removalNode from DOM. Note, this does not
-			// actually remove the node from the tree.
-			await GraphCanvasUtil.removeElementById(
-				removalNode.data.id,
-				this.animationTime800
-			);
+        async preorderTraversal() {
+            let nodeIds = this.bstD3Wrapper.preorderTraversal();
+            await GraphCanvasUtil.traverseCircularNodesById(
+                nodeIds,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
 
-			this.drawTree();
-		},
+        async postorderTraversal() {
+            let nodeIds = this.bstD3Wrapper.postorderTraversal();
+            await GraphCanvasUtil.traverseCircularNodesById(
+                nodeIds,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
 
-		visitNode: async function(inputInt) {
-			let nodes = this.bstD3Wrapper.getPathToNodeByKey(inputInt);
+        drawTree: async function() {
+            let bstD3Tree = this.bstD3Wrapper.tree(true);
 
-			if (nodes.length === 0) return;
+            if (bstD3Tree === null) return;
 
-			await GraphCanvasUtil.traverseCircularNodes(
-				nodes,
-				this.graph,
-				true,
-				"traversal-node",
-				this.nodeStrokeColorHilighted,
-				this.animationTime800
-			);
-		},
+            GraphCanvasUtil.drawCircularNodes(
+                bstD3Tree.descendants(),
+                this.getDefaultNodeOptions()
+            );
+            // this.drawNodes(bstD3Tree, "node", true, true);
+            if (bstD3Tree.descendants().length > 1) {
+                GraphCanvasUtil.drawLinks(
+                    bstD3Tree.descendants().slice(1),
+                    this.getDefaultLinkOptions()
+                );
+            }
+        },
+        getDefaultNodeOptions() {
+            const opt = {};
+            opt.parentClass = "aa-graph";
 
-		drawTree: async function() {
-			let bstD3Tree = this.bstD3Wrapper.tree(true);
+            //Class that should be assigned to the node
+            opt.cssClass = "node";
+            opt.removeExitNodes = true;
+            opt["stroke-width"] = `${this.nodeStrokeWidth}px`;
+            opt["stroke"] = this.nodeStrokeColorDefault;
+            opt["radius"] = `${this.nodeRadius}px`;
+            opt["fill"] = this.nodeFillColor;
+            opt["font-size"] = `${this.fontSize}px`;
+            opt["font-color"] = this.nodeFontColorDefault;
+            opt.fixedAtOrigin = false;
+            opt.transitionTime = this.animationTimePrimary;
+            return opt;
+        },
+        getDefaultLinkOptions() {
+            const opt = {};
 
-			if (bstD3Tree === null) return;
+            opt["stroke-width"] = `${this.nodeStrokeWidth}px`;
+            opt["stroke"] = this.nodeStrokeColorDefault;
+            opt.cssClass = "link";
+            opt.parentClass = "aa-graph";
+            opt.removeExitLinks = true;
+            opt.transitionTime = this.animationTimePrimary;
 
-			this.drawNodes(bstD3Tree, "node", true, true);
-			this.drawLinks(bstD3Tree, "link", true);
-		},
-		/**
-		 * Draws nodes using the specified cssSelectionClass string. A node
-		 * is a group that contains a circle and a text inside the circle. The text
-		 * represents the key of the node.
-		 *
-		 * @param node Object - A Node object as represented in d3 tree hierarchy. This can be a root/parent node (in which case
-		 * all the descendant nodes are also drawn). This can also be a single node, in which case the single node is drawn
-		 * @param cssSelectionClass String - CSS class that should be used to select the existing
-		 *      node to update. Note: All the existing nodes are updated before binding a new node
-		 * @param translate Boolean - All the nodex of x and y value, which represent where the nodes should end up in the screen. If true,
-		 * the node will be translated to that x and y position
-		 * */
-		async drawNodes(
-			node,
-			cssSelectionClass,
-			translate,
-			removeExitNode = false
-		) {
-			let vm = this;
+            return opt;
+        },
+        onCanvasInit(canvasSize) {
+            //Space on the x axis on left
+            const offsetX = this.nodeRadius * 2 + this.nodeStrokeWidth;
 
-			// this.graph.select(".node").remove();
-			let nodes = node.descendants();
-			let updateNodes = vm.graph
-				.selectAll(`.${cssSelectionClass}`)
-				.data(nodes, node => node.data.id);
+            //Space on the y axis on top (add extra five for nicer padding)
+            const offsetY = this.nodeRadius + this.nodeStrokeWidth + 5;
 
-			const enterNode = updateNodes
-				.enter()
-				.append("g")
-				.attr("id", d => {
-					return d.data.id;
-				})
-				.attr("class", cssSelectionClass);
+            //space that should be left empty on the bottom for the
+            //tree to grow when inserting new nodes (before the tree is
+            //re-drawn)
+            //strokeWidth*2 because we need to add space for the border of hilighter node
+            const spaceBottom =
+                this.linkLength + this.nodeStrokeWidth * 2 + this.nodeRadius;
 
-			if (cssSelectionClass != "node") {
-				enterNode.attr("class", "node");
-			}
+            //Create the group that contain the tree. Add a margin to the left
+            //and to the top by translating the group 50 pixelx to the right and pixels down
+            this.graph = d3
+                .select(".aa-drawing-board")
+                .append("g")
+                .attr("class", "aa-graph")
+                .attr("transform", `translate(${offsetX}, ${offsetY})`);
 
-			if (removeExitNode) {
-				updateNodes.exit().remove();
-			}
+            let treeWidth = canvasSize.width - offsetX;
+            let treeHeight = canvasSize.height - offsetY - spaceBottom;
 
-			enterNode
-				.append("circle")
-				.attr("r", vm.nodeRadius)
-				.attr("stroke", vm.nodeStrokeColorDefault)
-				.attr("stroke-width", `${vm.nodeStrokeWidth}px`)
-				.attr("fill", vm.nodeFillColor);
+            this.bstD3Wrapper = new BstD3Wrapper(
+                treeWidth,
+                treeHeight,
+                this.linkLength
+            );
 
-			//append text
-			enterNode
-				.append("text")
-				.attr("text-anchor", "middle")
-				.attr("font-size", vm.fontSize)
-				.attr("fill", vm.nodeFontColorDefault)
-				.attr("transform", `translate(0, 7)`)
-				.text(d => d.data.key);
-
-			if (translate) {
-				await enterNode
-					.merge(updateNodes)
-					.transition()
-					.duration(vm.animationTime800)
-					.attr("transform", function(d) {
-						return `translate(${d.x},${d.y})`;
-					})
-					.end();
-			}
-		},
-		/**
-		 * This method draws a links between each descendant node of the given node in the parameter and it's parent.
-		 * For example, if the given node is Node(5) which has a left child Node(4), and Node(4) has a left child Node(3), a link is
-		 * drawn between Node(5) and Node(4), another between Node(4) and Node(3)
-		 *
-		 * @param node Object - The parent node from where the links should be drawn
-		 * @cssSelectionClass String - css class that should be used to query the existing link to update. This class
-		 * is also assigned to all the new links that are drawn
-		 */
-		async drawLinks(node, cssSelectionClass, removeExitLinks) {
-			let vm = this;
-			let links = node.descendants().slice(1);
-			const updateLinks = vm.graph
-				.selectAll(`.${cssSelectionClass}`)
-				.data(links, node => node.data.id);
-
-			let enterLinks = updateLinks
-				.enter()
-				.append("line")
-				.attr("id", function(node) {
-					return vm.getLinkId(node);
-				})
-				.attr("class", cssSelectionClass)
-				.attr("fill", "none")
-				.attr("stroke", "#aaa")
-				.attr("stroke-color", vm.nodeStrokeColorDefault)
-				.attr("x1", d => {
-					return d.parent.x;
-				})
-				.attr("y1", d => {
-					return d.parent.y;
-				})
-				.attr("x2", function(d) {
-					return d.parent.x;
-				})
-				.attr("y2", d => {
-					return d.parent.y;
-				});
-
-			//Remove any links from the DOM which could not be bound to a datum
-			if (removeExitLinks) {
-				updateLinks.exit().remove();
-			}
-
-			// Before the animation, lower the links
-			// to appear behind the circle
-			enterLinks.lower();
-
-			await enterLinks
-				.merge(updateLinks)
-				.transition()
-				.duration(this.animationTime800)
-				.attr("x1", d => {
-					return d.parent.x;
-				})
-				.attr("y1", d => {
-					return d.parent.y;
-				})
-				.attr("x2", function(d) {
-					return d.x;
-				})
-				.attr("y2", d => {
-					return d.y - vm.nodeRadius;
-				})
-				.end();
-		},
-		getLinkId: function(node) {
-			return `link-${node.data.id}`;
-		},
-
-		initCanvasHeight() {
-			this.canvasHeight =
-				window.top.innerHeight -
-				document.getElementById("aa-bst-canvas").getBoundingClientRect()
-					.y -
-				10;
-		}
-	},
-	mounted: function() {
-		this.initCanvasHeight();
-		this.init();
-
-		let treeWidth = this.canvasWidth - this.padding - this.nodeRadius - 2; //2 is for stroke width
-		let treeHeight =
-			this.canvasHeight -
-			this.padding -
-			this.nodeRadius * 2 -
-			2 -
-			this.canvasHeightIncrement; //2 is for stroke height
-
-		this.bstD3Wrapper = new BstD3Wrapper(treeWidth, treeHeight);
-
-		//Keeps track of the height of the tree. It will be useful
-		//to decide whether the tree should be resized in the next
-		//draw
-		this.treeDepth = 0;
-	},
-	created: function() {
-		// This is the group element (<g>) that contains the the tree
-		this.graph = undefined;
-
-		this.padding = 50; // padding between the svg element and the first group element
-
-		// this.$gtag.event("login", { method: "Google" });
-	},
-	components: {
-		"hr-with-text": HRWithText,
-		"user-input-box": UserInputBox,
-		"range-input": RangeInput,
-		"drawing-board": DrawingBoard,
-		"input-data-list": InputDataList
-	}
+            //Keeps track of the height of the tree. It will be useful
+            //to decide whether the tree should be resized in the next
+            //draw
+            this.treeDepth = 0;
+        }
+    },
+    created: function() {
+        // This is the group element (<g>) that contains the the tree
+        this.graph = undefined;
+        // this.$gtag.event("login", { method: "Google" });
+    },
+    components: {
+        "hr-with-text": HRWithText,
+        "user-input-box": UserInputBox,
+        "range-input": RangeInput,
+        "drawing-board-fluid": DrawingBoardFluid,
+        "input-data-list": InputDataList,
+        "eden-space": EdenSpace
+    }
 };
 </script>
 <style scoped>
 .aa-container {
-	width: 100%;
-	height: 100%;
-	padding: 1%;
+    width: 100%;
+    height: 100%;
+    padding: 1%;
 }
 
-/* .aa-config-row {
-    height: 100px;
-    border-bottom: 1px solid #f14a60;
-} */
-
 .aa-config-col {
-	border-left: 1px solid #f14a60;
+    border-left: 1px solid #f14a60;
 }
 
 hr {
-	border: 0;
-	clear: both;
-	display: block;
-	width: 96%;
-	background-color: #ffff00;
-	background-color: gray;
-	height: 1px;
+    border: 0;
+    clear: both;
+    display: block;
+    width: 96%;
+    background-color: #ffff00;
+    background-color: gray;
+    height: 1px;
 }
 </style>

@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-debugger */
 "use strict";
-const uuidv4 = require("uuid/v4");
 class Node {
     _id = null;
     _key = null;
@@ -206,56 +205,6 @@ class BST {
     }
 
 
-    // findSuccessor(key, id) {
-    //     debugger;
-    //     let parentNode = this.getParentNode(key, id);
-    //     let targetNode = null;
-    //     let successorNode = null;
-
-    //     // If the key and id belong to the root node, parentNode is going to be null
-
-    //     if (parentNode === null) {
-    //         targetNode = this.root;
-    //     } else if (parentNode.left !== null && parentNode.left.key === key && parentNode.left.id === id) {
-    //         targetNode = parentNode.left;
-    //     } else {
-    //         targetNode = parentNode.right;
-    //     }
-
-    //     //If the node to remove has no children
-    //     if (targetNode.children().length === 0) {
-    //         successorNode = null;
-    //     }
-
-    //     //If the node to remove has one child
-    //     else if (targetNode.children().length === 1) {
-    //         successorNode = targetNode.children()[0];
-    //     } else {
-    //         let collector = [];
-    //         this._preorderTraversal(this.root, collector);
-
-    //         for (let i = 0; i < collector.length; i++) {
-    //             const node = collector[i];
-    //             if (node.key === key && node.id === id) {
-    //                 successorNode = collector[i + 1];
-    //             }
-    //         }
-    //     }
-
-    //     return {
-    //         parent: parentNode,
-    //         target: targetNode,
-    //         successor: successorNode
-    //     }
-    // }
-
-    // _preorderTraversal(node, collector) {
-    //     if (node === null) return null;
-    //     this._preorderTraversal(node.left, collector);
-    //     collector.push(node);
-    //     this._preorderTraversal(node.right, collector);
-    // }
-
     /**
      * Swaps nodes 
      * @param {object} node
@@ -265,23 +214,9 @@ class BST {
     //TODO: Make this function more efficient
     deleteNode(key, id) {
 
-        // let parentNode = this.getParentNode(removalNodeKey, removalNodeId);
-
-        // let removalNode = null;
-        // //If parent node is null, we know it is the root node
-        // if (parentNode === null) {
-        //     removalNode = this.root;
-        // } else if (parentNode.left != null && parentNode.left.id === removalNodeId) {
-        //     removalNode = parentNode.left;
-        // } else {
-        //     removalNode = parentNode.right;
-        // }
-
         const collector = [];
 
         this._deleteNode(this.root, key, id, collector);
-
-
 
         return collector.length == 0 ? null : collector[0];
     }
@@ -312,8 +247,6 @@ class BST {
         //Case 2 node to be deleted has two children
         else if (node.children().length === 2) {
             let successor = this._getMinValNode(node.right);
-            debugger;
-
 
             collector.push(successor);
 
@@ -359,6 +292,46 @@ class BST {
 
         }
 
+    }
+
+    inorderTraversal() {
+        let collector = [];
+        this._inorderTraversal(this.root, collector);
+        return collector;
+    }
+
+    _inorderTraversal(parent, collector) {
+        if (parent === null) return;
+        this._inorderTraversal(parent.left, collector);
+        collector.push(parent);
+        this._inorderTraversal(parent.right, collector);
+    }
+
+    preorderTraversal() {
+        let collector = [];
+        this._preorderTraversal(this.root, collector);
+        return collector;
+    }
+
+    _preorderTraversal(parent, collector) {
+        if (parent === null) return;
+        collector.push(parent);
+        this._preorderTraversal(parent.left, collector);
+        this._preorderTraversal(parent.right, collector);
+    }
+
+
+    postorderTraversal() {
+        let collector = [];
+        this._postorderTraversal(this.root, collector);
+        return collector;
+    }
+
+    _postorderTraversal(parent, collector) {
+        if (parent === null) return;
+        this._postorderTraversal(parent.left, collector);
+        this._postorderTraversal(parent.right, collector);
+        collector.push(parent);
     }
 }
 

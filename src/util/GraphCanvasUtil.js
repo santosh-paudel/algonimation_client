@@ -69,7 +69,9 @@ class GraphCanvasUtil {
      * circle
      * @param {Integer} transitionTime - 
      */
-    static async traverseCircularNodes(nodes, parentGroup, fadeOutAtEnd, selectionId, ringColor, transitionTime) {
+    static async traverseCircularNodes(nodes, parentGroup, fadeOutAtEnd, selectionId, ringColor, transitionTime, collector = null) {
+
+        if (nodes.length === 0) return;
 
         let currentNode = nodes[0];
         // eslint-disable-next-line no-unused-vars
@@ -90,6 +92,7 @@ class GraphCanvasUtil {
             .attr("stroke-width", `${currentNodeStrokeWidth + 1}px`)
             .attr("stroke", ringColor);
 
+
         await outerRing
             .transition()
             .ease(d3.easeLinear)
@@ -97,18 +100,22 @@ class GraphCanvasUtil {
             .style("opacity", "1")
             .end();
 
+        if (collector !== null) collector.push(currentNode.data.key);
         // Note: Do not use nodes.splice(1) to iterate
         // through the nodes as it modified the original
         // nodes array
         for (let i = 1; i < nodes.length; i++) {
             const node = nodes[i];
+
             await GraphCanvasUtil.moveCircularNodeById(
                 selectionId,
                 node.x,
                 node.y,
                 transitionTime
             );
+
             currentNode = node;
+            if (collector !== null) collector.push(node.data.key);
         }
 
         if (fadeOutAtEnd) {
@@ -121,6 +128,161 @@ class GraphCanvasUtil {
         return currentNode;
     }
 
+    static async traverseCircularNodesById(nodeIds, parentGroup, fadeOutAtEnd, selectionId, ringColor, transitionTime, collector = null) {
+        if (nodeIds.length === 0) return;
+
+        const nodes = [];
+        nodeIds.forEach((id) => {
+            let datum = d3.select(`#${id}`).datum();
+            nodes.push(datum);
+        });
+
+        GraphCanvasUtil.traverseCircularNodes(nodes, parentGroup, fadeOutAtEnd, selectionId, ringColor, transitionTime, collector);
+    }
+
+    /**
+     * Draws nodes using the specified cssSelectionClass string. A node
+     * is a group that contains a circle and a text inside the circle. The text
+     * represents the key of the node.
+     *
+     * @param node Object - A Node object as represented in d3 tree hierarchy. This can be a root/parent node (in which case
+     * all the descendant nodes are also drawn). This can also be a single node, in which case the single node is drawn
+     * @param cssClass String - CSS class that should be used to select the existing
+     *      node to update. Note: All the existing nodes are updated before binding a new node
+     * @param translate Boolean - By default, the nodes appear at (0,0) position on the screen although their datum may have x and y position
+     * specified. Unless this argument is true, the nodes will not be translated to their new position
+     * */
+    static async drawCircularNodes(nodes, opt) {
+
+        opt.parentClass = opt.parentClass || "svg";
+
+        //Class that should be assigned to the node
+        opt.cssClass = opt.cssClass || "node";
+        opt.removeExitNodes = opt.removeExitNodes || false;
+        opt['stroke-width'] = opt['stroke-width'] || "2px";
+        opt['stroke'] = opt['stroke'] || 'red';
+        opt['radius'] = opt['radius'] || "50px";
+        opt['fill'] = opt['fill'] || 'blue';
+        opt['font-size'] = opt['font-size'] || '12px';
+        opt['font-color'] = opt['font-color'] || 'red';
+        //By default, the nodes appear at (0,0) position on the screen although their datum may have x and y position
+        //specified. Unless this argument is true, the nodes will not be translated to their new position
+        opt.fixedAtOrigin = opt.fixedAtOrigin || false;
+
+        opt.transitionTime = opt.transitionTime || 1000;
+
+
+        let updateNodes = d3.select(`.${opt.parentClass}`)
+            .selectAll(`.${opt.cssClass}`)
+            .data(nodes, node => node.data.id);
+
+        const enterNode = updateNodes
+            .enter()
+            .append("g")
+            .attr("id", d => {
+                return d.data.id;
+            })
+            .attr("class", opt.cssClass);
+
+        if (opt.removeExitNodes) {
+            updateNodes.exit().remove();
+        }
+
+        enterNode
+            .append("circle")
+            .attr("r", opt.radius)
+            .attr("stroke", opt.stroke)
+            .attr("stroke-width", opt['stroke-width'])
+            .attr("fill", opt.fill);
+
+        //append text
+        enterNode
+            .append("text")
+            .attr("text-anchor", "middle")
+            .attr("font-size", opt['font-size'])
+            .attr("fill", opt['font-color'])
+            .attr("transform", `translate(0, 7)`)
+            .text(d => d.data.key);
+
+        if (!opt.fixedAtOrigin) {
+            await enterNode
+                .merge(updateNodes)
+                .transition()
+                .duration(opt.transitionTime)
+                .attr("transform", function (d) {
+                    return `translate(${d.x},${d.y})`;
+                })
+                .end();
+        }
+    }
+
+    /**
+     * This method draws a links between each descendant node of the given node in the parameter and it's parent.
+     * For example, if the given node is Node(5) which has a left child Node(4), and Node(4) has a left child Node(3), a link is
+     * drawn between Node(5) and Node(4), another between Node(4) and Node(3)
+     */
+    static async drawLinks(nodes, opt) {
+
+        opt.parentClass = opt.parentClass || "svg";
+        opt.cssClass = opt.cssClass || 'link';
+        opt.removeExitLinks = opt.removeExitLinks === undefined ? true : opt.removeExitLinks;
+        opt['stroke-width'] = opt['stroke-width'] || "2px";
+        opt['stroke'] = opt['stroke'] || 'red';
+        opt.transitionTime = opt.transitionTime || 1000;
+
+        const updateLinks = d3.select(`.${opt.parentClass}`)
+            .selectAll(`.${opt.cssClass}`)
+            .data(nodes, node => node.data.id);
+
+        let enterLinks = updateLinks
+            .enter()
+            .append("line")
+            .attr("id", function (node) {
+                return `link-${node.data.id}`
+            })
+            .attr("class", opt.cssClass)
+            .attr("stroke-width", opt['stroke-width'])
+            .attr("stroke", opt['stroke'])
+            .attr("x1", d => {
+                return d.parent.x;
+            })
+            .attr("y1", d => {
+                return d.parent.y;
+            })
+            .attr("x2", function (d) {
+                return d.parent.x;
+            })
+            .attr("y2", d => {
+                return d.parent.y;
+            });
+
+        //Remove any links from the DOM which could not be bound to a datum
+        if (opt.removeExitLinks) {
+            updateLinks.exit().remove();
+        }
+
+        // Before the animation, lower the links
+        // to appear behind the circle
+        enterLinks.lower();
+
+        await enterLinks
+            .merge(updateLinks)
+            .transition()
+            .duration(opt.transitionTime)
+            .attr("x1", d => {
+                return d.parent.x;
+            })
+            .attr("y1", d => {
+                return d.parent.y;
+            })
+            .attr("x2", function (d) {
+                return d.x;
+            })
+            .attr("y2", d => {
+                return d.y;
+            })
+            .end();
+    }
 
 
 }

@@ -9,6 +9,7 @@ class BstD3Wrapper {
     depth = 9999999;
     treeLayout = null;
     d3Tree = null;
+    linkLength = null;
 
     bst = null;
 
@@ -17,9 +18,10 @@ class BstD3Wrapper {
 
     orderOfEntry = {};
 
-    constructor(width, height) {
+    constructor(width, height, linkLength) {
         this.cartisanWidth = width;
         this.cartisanHeight = height;
+        this.linkLength = linkLength;
 
         this.treeLayout = d3.tree().size([this.cartisanWidth, this.cartisanHeight]);
         this.bst = new BST();
@@ -51,7 +53,7 @@ class BstD3Wrapper {
                 node.x += 50;
             }
 
-            if (node.y - node.parent.y > 180) node.y = node.parent.y + 180;
+            if (node.y - node.parent.y > this.linkLength) node.y = node.parent.y + this.linkLength;
         });
     }
 
@@ -107,7 +109,7 @@ class BstD3Wrapper {
             d3ParentNode.children = children.concat([newD3Node]);
         }
 
-        newD3Node.y = d3ParentNode.y + 180;
+        newD3Node.y = d3ParentNode.y + this.linkLength;
         newD3Node.depth = d3ParentNode.depth + 1;
         newD3Node.height = 0;
         newD3Node.parent = d3ParentNode;
@@ -149,32 +151,8 @@ class BstD3Wrapper {
         return this.tree(true);
     }
 
-    // findSuccessor(key, id) {
-    //     let successorBstNode = this.bst.findSuccessor(key, id).successor;
-
-    //     if (successorBstNode === null) return null;
-
-    //     let d3Node = null;
-    //     for (const node of this.d3Tree.descendants()) {
-    //         if (node.data.key === successorBstNode.key && node.data.id === successorBstNode.id) {
-    //             d3Node = node;
-    //             break;
-    //         }
-    //     }
-
-    //     return d3Node;
-    // }
-
-    // deleteNode(removalNode, successor) {
-    //     const successorKey = successor === null ? null : successor.data.key;
-    //     const successorId = successor === null ? null : successor.data.id;
-    //     this.bst.deleteNode(removalNode.data.key, removalNode.data.id, successorKey, successorId);
-    // }
-
     deleteNode(d3Node) {
 
-        // eslint-disable-next-line no-unused-vars
-        let d3NodeCopy = clonedeep(d3Node);
         let d3TreeCopy = clonedeep(this.tree(false));
         let successorNodeData = this.bst.deleteNode(d3Node.data.key, d3Node.data.id);
 
@@ -194,6 +172,40 @@ class BstD3Wrapper {
         return null;
 
     }
+
+    inorderTraversal() {
+        let inorderBstNodes = this.bst.inorderTraversal();
+
+        let nodeIds = [];
+        inorderBstNodes.forEach((node) => {
+            nodeIds.push(node.id);
+        })
+
+        return nodeIds;
+    }
+
+    preorderTraversal() {
+        let preorderBstNodes = this.bst.preorderTraversal();
+
+        let nodeIds = [];
+        preorderBstNodes.forEach((node) => {
+            nodeIds.push(node.id);
+        })
+
+        return nodeIds;
+    }
+
+    postorderTraversal() {
+        let postorderBstNodes = this.bst.postorderTraversal();
+
+        let nodeIds = [];
+        postorderBstNodes.forEach((node) => {
+            nodeIds.push(node.id);
+        })
+
+        return nodeIds;
+    }
+
 
     height() {
         return this.bst.height();
