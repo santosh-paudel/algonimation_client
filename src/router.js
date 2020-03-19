@@ -4,7 +4,7 @@ import Router from "vue-router";
 
 import Home from "@/Home";
 import BinarySearchTree from "@/apps/BinarySearchTree";
-import GraphTheory from "@/apps/GraphTheory";
+import UndirectedGraph from "@/apps/UndirectedGraph";
 
 Vue.use(Router);
 
@@ -21,8 +21,8 @@ export default new Router({
     },
     {
       path: "/graph",
-      name: "GraphTheory",
-      component: GraphTheory,
+      name: "UndirectedGraph",
+      component: UndirectedGraph,
     }
   ]
 });

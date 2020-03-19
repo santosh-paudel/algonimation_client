@@ -17,9 +17,10 @@
                     <eden-space
                         class="aa-eden-space"
                         :nodes="edenNodes"
+                        :name="edenName"
                         bgcolor="rgba(212, 114, 140, 0.03)"
                         :style="{height: `${edenHeight}px`}"
-                        @on-clear-eden="onClearEden"
+                        @on-clear-eden="clearEden"
                     ></eden-space>
                 </div>
             </div>
@@ -75,7 +76,7 @@ import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
 import { GraphCanvasUtil } from "../util/GraphCanvasUtil";
 import DrawingBoardFluid from "@/components/DrawingBoardFluid.vue";
-import HRWithText from "@/components/HRWithText.vue";
+import HRWithText from "../components/UIComponents/HRWithText.vue";
 import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "../components/RangeInput";
 import InputDataList from "@/components/UIComponents/InputDataList.vue";
@@ -108,17 +109,19 @@ export default {
                 "Preorder Traversal",
                 "Postorder Traversal"
             ],
+            edenName: "",
             edenNodes: []
         };
     },
     methods: {
-        async onClearEden(userInput) {
+        async clearEden(userInput) {
             this.edenNodes = [];
+            this.edenName = "";
         },
         async userAction(userInput, actionName) {
             this.disableUserInteraction = true;
             //clear eden space before any operations
-            this.edenNodes = [];
+            this.clearEden();
             switch (actionName) {
                 case "insert":
                     await this.insertNode(userInput);
@@ -130,12 +133,15 @@ export default {
                     await this.visitNode(userInput);
                     break;
                 case "Inorder Traversal":
+                    this.edenName = actionName;
                     await this.inorderTraversal();
                     break;
                 case "Preorder Traversal":
+                    this.edenName = actionName;
                     await this.preorderTraversal();
                     break;
                 case "Postorder Traversal":
+                    this.edenName = actionName;
                     await this.postorderTraversal();
                     break;
                 default:

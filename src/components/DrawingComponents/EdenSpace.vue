@@ -18,7 +18,7 @@
                 >Clear</b-button>
             </b-col>
             <b-col cols="11">
-                <hr />
+                <hr-with-text :text="name"></hr-with-text>
             </b-col>
         </b-row>
 
@@ -29,10 +29,15 @@
 /* eslint-disable no-unused-vars */
 const uuidv4 = require("uuid/v4");
 import * as d3 from "d3";
+import HRWithText from "../UIComponents/HRWithText";
 import { GraphCanvasUtil } from "../../util/GraphCanvasUtil";
 export default {
     name: "EdenSpace",
     props: {
+        name: {
+            type: String,
+            required: true
+        },
         nodes: {
             type: Array,
             required: true
@@ -58,8 +63,7 @@ export default {
                 // eslint-disable-next-line no-debugger
                 debugger;
                 if (this.nodes.length === 0) {
-                    d3.data = d3
-                        .select(`.${this.parentClass}`)
+                    d3.select(`.${this.parentClass}`)
                         .selectAll(`.${this.nodeClass}`)
                         .remove();
                     return;
@@ -111,8 +115,7 @@ export default {
             return opt;
         },
         onClearEden() {
-            d3.data = d3
-                .select(`.${this.parentClass}`)
+            d3.select(`.${this.parentClass}`)
                 .selectAll(`.${this.nodeClass}`)
                 .remove();
             this.$emit("on-clear-eden", true);
@@ -127,6 +130,9 @@ export default {
                 "transform",
                 `translate(${this.nodeRadius}, ${this.nodeRadius})`
             );
+    },
+    components: {
+        "hr-with-text": HRWithText
     }
 };
 </script>
