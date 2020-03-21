@@ -420,6 +420,14 @@ class GraphCanvasUtil {
         opt.mouseout = opt.mouseout === undefined ? null : opt.mouseout;
         opt.click = opt.click === undefined ? null : opt.click;
 
+        opt.radiusOffset = opt.radiusOffset === undefined ? 30 : opt.radiusOffset;
+
+        links.forEach((link) => {
+            let distance = Math.sqrt((link.source.x - link.target.x) ** 2 + (link.source.y - link.target.y) ** 2);
+
+            link.distance = distance;
+        });
+
         const updateLinks = d3.select(`.${opt.parentClass}`)
             .selectAll(`.${opt.cssClass}`)
             .data(links, link => {
@@ -449,28 +457,7 @@ class GraphCanvasUtil {
         // to appear behind the circle
         enterLinks.lower();
 
-        //If the transition time is greater 0, the link
-        //should appear to grow from source to the target
-        //For that to happend, the link should be drawn first
-        //at source (as a dot)
-        if (opt.transitionTime > 0) {
-            enterLinks.select("line").attr("x1", d => {
-                    // return d.parent.x;
-                    return d.source.x;
-                })
-                .attr("y1", d => {
-                    // return d.parent.y;
-                    return d.source.y;
-                })
-                .attr("x2", function (d) {
-                    // return d.parent.x;
-                    return d.source.x;
-                })
-                .attr("y2", d => {
-                    // return d.parent.y;
-                    return d.source.y;
-                });
-        }
+
 
         if (opt.mouseover !== null) {
             enterLinks.on("mouseover", function (d, i) {
@@ -498,21 +485,75 @@ class GraphCanvasUtil {
             .select("line")
             .transition()
             .duration(opt.transitionTime)
-            .attr("x1", d => {
-                // return d.parent.x;
-                return d.source.x;
-            })
-            .attr("y1", d => {
-                // return d.parent.y;
-                return d.source.y;
-            })
-            .attr("x2", function (d) {
+            .attr("x1", link => {
                 // return d.x;
-                return d.target.x;
+                // return d.target.x;
+                let targetDistance = opt.radiusOffset;
+
+                //vector from source to target
+                let vector = [link.target.x - link.source.x, link.target.y - link.source.y];
+
+                let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+                let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
+
+                // //Now compute the target
+                let x = link.source.x + targetDistance * unitVector[0];
+                // link.target.y = link.source.y + targetDistance * unitVector[1];
+                return x;
             })
-            .attr("y2", d => {
+            .attr("y1", link => {
+                // return d.parent.y;
+                // return d.source.y;
                 // return d.y;
-                return d.target.y;
+                // return d.target.y;
+
+                //compute the target
+                let targetDistance = opt.radiusOffset;
+
+                //vector from source to target
+                let vector = [link.target.x - link.source.x, link.target.y - link.source.y];
+
+                let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+                let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
+
+                // //Now compute the target
+                // link.target.x = link.source.x + targetDistance * unitVector[0];
+                let y = link.source.y + targetDistance * unitVector[1];
+                return y;
+            })
+            .attr("x2", function (link) {
+                // return d.x;
+                // return d.target.x;
+                let targetDistance = link.distance - opt.radiusOffset;
+
+                //vector from source to target
+                let vector = [link.target.x - link.source.x, link.target.y - link.source.y];
+
+                let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+                let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
+
+                // //Now compute the target
+                let x = link.source.x + targetDistance * unitVector[0];
+                // link.target.y = link.source.y + targetDistance * unitVector[1];
+                return x;
+            })
+            .attr("y2", link => {
+                // return d.y;
+                // return d.target.y;
+
+                //compute the target
+                let targetDistance = link.distance - opt.radiusOffset;
+
+                //vector from source to target
+                let vector = [link.target.x - link.source.x, link.target.y - link.source.y];
+
+                let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+                let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
+
+                // //Now compute the target
+                // link.target.x = link.source.x + targetDistance * unitVector[0];
+                let y = link.source.y + targetDistance * unitVector[1];
+                return y;
             })
             .end();
 

@@ -107,6 +107,7 @@ export default {
             opt.mouseover = this.mouseOverLink;
             opt.mouseout = this.mouseOutLink;
             opt.click = this.clickLink;
+            opt.radiusOffset = this.nodeRadius + 2; //add a random small value
 
             return opt;
         }
@@ -338,13 +339,18 @@ export default {
         },
         mouseOverLink(svgNode, d, i) {
             d3.select(svgNode)
+                .raise()
+                .select("line")
                 .transition()
                 .duration(300)
                 .attr("cursor", "pointer")
                 .attr("stroke-width", "4px");
+            // .raise();
         },
         mouseOutLink(svgNode, d, i) {
             d3.select(svgNode)
+                .lower()
+                .select("line")
                 .transition()
                 .duration(300)
                 .attr("stroke-width", this.strokeWidth);
