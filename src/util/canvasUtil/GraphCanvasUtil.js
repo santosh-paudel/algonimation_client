@@ -1,5 +1,7 @@
 import * as d3 from "d3";
-import { BasicCanvasUtil } from "./BasicCanvasUtil";
+import {
+  BasicCanvasUtil
+} from "./BasicCanvasUtil";
 class GraphCanvasUtil extends BasicCanvasUtil {
   /**
    * Draws nodes using the specified cssSelectionClass string. A node
@@ -80,19 +82,19 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     // });
 
     if (opt.mouseover !== null) {
-      enterNode.on("mouseover", function(d, i) {
+      enterNode.on("mouseover", function (d, i) {
         opt.mouseover(this, d, i);
       });
     }
 
     if (opt.mouseover !== null) {
-      enterNode.on("mouseout", function(d, i) {
+      enterNode.on("mouseout", function (d, i) {
         opt.mouseout(this, d, i);
       });
     }
 
     if (opt.click !== null) {
-      enterNode.on("click", function(d, i) {
+      enterNode.on("click", function (d, i) {
         opt.click(this, d, i);
       });
     }
@@ -100,16 +102,16 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     if (opt.dragEvents !== null) {
       enterNode.call(
         d3
-          .drag()
-          .on("start", function(d, i) {
-            opt.dragEvents.start(d, i);
-          })
-          .on("drag", function(d, i) {
-            opt.dragEvents.drag(d, i);
-          })
-          .on("end", function(d, i) {
-            opt.dragEvents.end(d, i);
-          })
+        .drag()
+        .on("start", function (d, i) {
+          opt.dragEvents.start(d, i);
+        })
+        .on("drag", function (d, i) {
+          opt.dragEvents.drag(d, i);
+        })
+        .on("end", function (d, i) {
+          opt.dragEvents.end(d, i);
+        })
       );
     }
 
@@ -125,12 +127,12 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         await mergedNode
           .transition()
           .duration(opt.transitionTime)
-          .attr("transform", function(d) {
+          .attr("transform", function (d) {
             return `translate(${d.x},${d.y})`;
           })
           .end();
       } else {
-        mergedNode.attr("transform", function(d) {
+        mergedNode.attr("transform", function (d) {
           return `translate(${d.x},${d.y})`;
         });
       }
@@ -160,7 +162,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     links.forEach(link => {
       let distance = Math.sqrt(
         (link.source.x - link.target.x) ** 2 +
-          (link.source.y - link.target.y) ** 2
+        (link.source.y - link.target.y) ** 2
       );
 
       link.distance = distance;
@@ -176,7 +178,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     let enterLinks = updateLinks
       .enter()
       .append("g")
-      .attr("id", function(link) {
+      .attr("id", function (link) {
         return `${link.source.id}-link-${link.target.id}`;
       })
       .attr("class", opt.cssClass);
@@ -196,19 +198,19 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     enterLinks.lower();
 
     if (opt.mouseover !== null) {
-      enterLinks.on("mouseover", function(d, i) {
+      enterLinks.on("mouseover", function (d, i) {
         opt.mouseover(this, d, i);
       });
     }
 
     if (opt.mouseout !== null) {
-      enterLinks.on("mouseout", function(d, i) {
+      enterLinks.on("mouseout", function (d, i) {
         opt.mouseout(this, d, i);
       });
     }
 
     if (opt.click !== null) {
-      enterLinks.on("click", function(d, i) {
+      enterLinks.on("click", function (d, i) {
         d3.event.stopPropagation();
         opt.click(this, d, i);
       });
@@ -261,7 +263,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         let y = link.source.y + targetDistance * unitVector[1];
         return y;
       })
-      .attr("x2", function(link) {
+      .attr("x2", function (link) {
         // return d.x;
         // return d.target.x;
         let targetDistance = link.distance - opt.radiusOffset;
@@ -326,18 +328,21 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         //Find midpoint vector from source to midpoint
         let [m, n] = [midpoint[0] - link.source.x, midpoint[1] - link.source.y];
 
-        // let y = Math.sqrt(
-        let v =
-          Math.sqrt(
-            ((9 + m ** 2 + n ** 2) * m ** 2 -
-              2 * Math.pow(n, 4) -
-              2 * m ** 2 * n ** 2) /
-              (m ** 2 + n ** 2)
-          ) - n;
+        let numerator = (225 + m ** 2 + n ** 2) * m ** 2 - Math.pow(m, 4) - 2 * m ** 2 * n ** 2 - Math.pow(n, 4);
+        let denumerator = m ** 2 + n ** 2;
+
+        let v = Math.sqrt(numerator / denumerator + n ** 2) + n;
 
         let u = (m ** 2 + n ** 2 - n * v) / m;
 
-        return `translate(${u}, ${v})`;
+
+        let v_vector = v - n;
+        let u_vector = u - m;
+
+        //Now change the origin back to 0,0 from the midpoint
+
+
+        return `translate(${u_vector + midpoint[0]}, ${v_vector + midpoint[1]})`;
       })
       .text(d => {
         console.log(d);
@@ -346,4 +351,6 @@ class GraphCanvasUtil extends BasicCanvasUtil {
   }
 }
 
-export { GraphCanvasUtil };
+export {
+  GraphCanvasUtil
+};
