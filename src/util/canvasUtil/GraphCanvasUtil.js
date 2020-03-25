@@ -69,6 +69,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     //append text
     enterNode
       .append("text")
+      .attr("cursor", "pointer")
       .attr("text-anchor", "middle")
       .attr("font-size", opt["font-size"])
       .attr("fill", opt["font-color"])
@@ -219,6 +220,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     await enterLinks
       .merge(updateLinks)
       .select("line")
+      .attr("cursor", "pointer")
       .transition()
       .duration(opt.transitionTime)
       .attr("x1", link => {
@@ -307,19 +309,23 @@ class GraphCanvasUtil extends BasicCanvasUtil {
 
     enterLinks
       .append("text")
+      .attr("cursor", "pointer")
+      .on("mouseover", function (d, i) {
+        //If the user hovers over the text, return it's parent group
+        if (opt.mouseover !== null) {
+          opt.mouseover(this.parentElement, d, i);
+        }
+      })
       .attr("text-anchor", "middle")
       .attr("font-size", opt["font-size"])
-      .attr("fill", "#000000")
+      .attr("fill", "#3F3F3F")
       .raise();
 
     enterLinks
       .merge(updateLinks)
       .select("text")
       .attr("transform", link => {
-        // return `translate(${(d.source.x + d.target.x) / 2 - 5}, ${(d.source.y +
-        //   d.target.y) /
-        //   2 -
-        //   5})`;
+
         //Find the midpoint between the source and target
         let midpoint = [
           (link.source.x + link.target.x) / 2,
