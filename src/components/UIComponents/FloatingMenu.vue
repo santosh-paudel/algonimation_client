@@ -6,7 +6,8 @@
     <div id="aa-floating-menu" class="list-group" :style="style">
         <li
             v-for="item in menuItems"
-            class="list-group-item floating-menu-item py-1 rounded-0"
+            class="list-group-item floating-menu-item text-secondary py-1 rounded-0"
+            style="font-size:0.9rem;"
             :key="item"
             @click="onItemSelected(item)"
         >{{item}}</li>

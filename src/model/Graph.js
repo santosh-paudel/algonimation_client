@@ -43,7 +43,6 @@ class Graph {
         //adjacencyList = {key1: {key2: weight, key3: weight}, key2: {key1: weight}, key3: {key1: weight}}
         this._adjacencyList[key1][key2] = weight;
         this._adjacencyList[key1][key2] = weight;
-        console.log(JSON.stringify(this.edges()));
     }
     delete(key) {
         delete this._database[key];

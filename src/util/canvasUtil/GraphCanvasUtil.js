@@ -331,8 +331,12 @@ class GraphCanvasUtil extends BasicCanvasUtil {
           (link.source.x + link.target.x) / 2,
           (link.source.y + link.target.y) / 2
         ];
-        //Find midpoint vector from source to midpoint
+        //Find the vector from source to midpoint
         let [m, n] = [midpoint[0] - link.source.x, midpoint[1] - link.source.y];
+
+        //If m and n are 0, add a small random number. They both appear in the denumerator. 
+        if (m === 0) m += 0.001;
+        if (n === 0) n += 0.001;
 
         let numerator = (225 + m ** 2 + n ** 2) * m ** 2 - Math.pow(m, 4) - 2 * m ** 2 * n ** 2 - Math.pow(n, 4);
         let denumerator = m ** 2 + n ** 2;
@@ -351,8 +355,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         return `translate(${u_vector + midpoint[0]}, ${v_vector + midpoint[1]})`;
       })
       .text(d => {
-        console.log(d);
-        return "10";
+        return d.weight === null ? '*' : d.weight;
       });
   }
 }

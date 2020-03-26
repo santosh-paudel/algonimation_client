@@ -12,6 +12,7 @@
                     v-if="showFloatingInput"
                     :coords="{x: clickCoord.x, y:clickCoord.y - 50}"
                     :errorMsg="floatingInputErrorMsg"
+                    :placeholder="floatingMenuPlaceHolder"
                     @on-user-input="onFloatingBoxInput"
                     @on-dialog-close="showFloatingInput = false"
                 ></floating-input-box>
@@ -55,7 +56,8 @@ export default {
             floatingInputErrorMsg: "",
             showFloatingInput: false,
             showFloatingMenu: false,
-            floatingMenuItems: ["Delete"],
+            floatingMenuItems: ["Delete Link", "Add/Edit Weight"],
+            floatingMenuPlaceHolder: "Key",
 
             //This is an object that contains the name of the
             //clicked element and the data they represent. It can have
@@ -127,6 +129,7 @@ export default {
             //Else show the floating input box
             else {
                 this.showFloatingInput = true;
+                this.floatingMenuPlaceHolder = "Key";
             }
         },
         onFloatingBoxInput(data) {
@@ -144,10 +147,12 @@ export default {
                     }
                     break;
                 }
-                case "link":
-                    // this.addWeight(data);
+                case "link": {
+                    const link = this.clickedElement.data;
+                    this.addWeight(link.source, link.target, data);
                     this.floatingInputErrorMsg = "";
                     break;
+                }
                 default:
                     break;
             }
@@ -159,9 +164,19 @@ export default {
         onFloatingMenuInput(data) {
             switch (this.clickedElement.type) {
                 case "node":
-                    if (data === "Delete") {
+                    //Delete
+                    if (data === this.floatingMenuItems[0]) {
                         this.deleteNode(this.clickedElement.data);
                     }
+                    break;
+
+                //Add or edit weight
+                case "link": {
+                    if (data === this.floatingMenuItems[1]) {
+                        this.showFloatingInput = true;
+                        this.floatingMenuPlaceHolder = "weight";
+                    }
+                }
             }
 
             this.showFloatingMenu = false;
@@ -191,12 +206,29 @@ export default {
         },
 
         addLink(source, target) {
-            this.graph.link(source.key, target.key, 5);
+            this.graph.link(source.key, target.key, null);
 
             this.simulation
                 .force("link")
                 .links()
-                .push({ source: source, target: target });
+                .push({ source: source, target: target, weight: null });
+
+            this.restart(
+                this.simulation.nodes(),
+                this.simulation.force("link").links()
+            );
+        },
+
+        addWeight(source, target, weight) {
+            for (let link of this.simulation.force("link").links()) {
+                if (
+                    link.source.key === source.key &&
+                    link.target.key === target.key
+                ) {
+                    link.weight = weight;
+                    this.graph.link(source.key, target.key, weight);
+                }
+            }
 
             this.restart(
                 this.simulation.nodes(),

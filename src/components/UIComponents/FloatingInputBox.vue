@@ -10,7 +10,7 @@
                 <b-form-input
                     :state="errorMsg === '' ? null: false"
                     v-model="userInput"
-                    placeholder="Key"
+                    :placeholder="placeholder"
                 ></b-form-input>
                 <div class="input-group-append">
                     <button class="btn btn-outline-secondary" @click="onInput" type="button">Submit</button>
@@ -35,6 +35,10 @@ export default {
         errorMsg: {
             type: String,
             default: ""
+        },
+        placeholder: {
+            type: String,
+            default: "Input"
         }
     },
     data: function() {
