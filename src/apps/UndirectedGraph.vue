@@ -1,25 +1,32 @@
 <template>
-  <div
-    class="container-fluid h-100 pt-2 pb-2 pl-2 mt-5"
-    style="position:relative;"
-  >
-    <b-row class="pt-4 pb-2 pl-2" style="background-color: #fff9fb">
-      <div class="d-flex justify-content-start">
-        <b-button
-          variant="light"
-          style="border: 1px solid #a8acb1: height:30px;"
-          class="text-secondary btn-sm mr-4 ml-2"
-          >Random Graph</b-button
-        >
-        <input-data-list
-          :dataList="graphOperations"
-          height="30px"
-        ></input-data-list>
+  <div class="container pt-2 pb-2 pl-2 h-100" style="position:relative">
+    <div class="d-flex flex-column h-100" style="border: 1px solid #E5E5E5;">
+      <div
+        class="pt-4 pb-2 pl-2"
+        style="background-color: rgba(212, 114, 140, 0.1)"
+      >
+        <div class="d-flex justify-content-start" style="height:40px">
+          <b-button
+            variant="light"
+            style="border: 1px solid #a8acb1; height:30px"
+            class="text-secondary btn-sm mr-4"
+            @click="generateRandomGraph"
+            >Random Graph</b-button
+          >
+          <input-data-list
+            :dataList="graphOperations"
+            height="30px"
+          ></input-data-list>
+        </div>
+        <p class="text-left text-info mb-0 mt-2" style="font-size:0.9rem;">
+          Click on the canvas below to create new nodes. Click and drag your
+          mouse from a node to another to draw a link between the nodes. Click
+          on the link to edit the weight of the link. Use the controls below to
+          perform graph operations
+        </p>
       </div>
-    </b-row>
-    <hr class="mt-0 mb-0" />
-    <b-row>
-      <div class="col-sm-12">
+      <hr class="w-100 mt-0 mb-0" />
+      <div class="w-100 h-100">
         <floating-menu
           v-if="showFloatingMenu"
           :menuItems="floatingMenuItems"
@@ -28,7 +35,7 @@
         ></floating-menu>
         <floating-input-box
           v-if="showFloatingInput"
-          :coords="{ x: clickCoord.x, y: clickCoord.y - 50 }"
+          :coords="{ x: clickCoord.x, y: clickCoord.y }"
           :errorMsg="floatingInputErrorMsg"
           :placeholder="floatingMenuPlaceHolder"
           @on-user-input="onFloatingBoxInput"
@@ -37,12 +44,12 @@
         <drawing-board-fluid
           class="aa-graph-canvas"
           id="canvas-382d3"
-          bgcolor="#fff9fb"
+          bgcolor="rgba(212, 114, 140, 0.03)"
           @on-canvas-click="onCanvasClick"
           @on-canvas-ready="onCanvasReady"
         ></drawing-board-fluid>
       </div>
-    </b-row>
+    </div>
   </div>
 </template>
 <script>
@@ -62,7 +69,7 @@ export default {
     return {
       canvasHeight: Number,
       canvasWidth: Number,
-      nodeRadius: 25.0,
+      nodeRadius: 20.0,
       strokeWidth: "2px",
       currentHover: null,
 
@@ -97,7 +104,7 @@ export default {
       opt["stroke"] = "#747474";
       opt["radius"] = `${this.nodeRadius}px`;
       opt["fill"] = "#74DB86";
-      opt["font-size"] = `16px`;
+      opt["font-size"] = "14px";
       opt["font-color"] = "#FFFFFF";
       opt.fixedAtOrigin = false;
       opt.transitionTime = 0;
@@ -132,6 +139,12 @@ export default {
     }
   },
   methods: {
+    onCanvasReady(dimension) {
+      this.canvasHeight = dimension.height;
+      this.canvasWidth = dimension.width;
+
+      this.initGraph();
+    },
     onCanvasClick(coord) {
       let vm = this;
       //Don't add any nodes if the mouse is currently hovering over a node
@@ -195,13 +208,45 @@ export default {
       this.showFloatingMenu = false;
     },
 
-    onCanvasReady(dimension) {
-      this.canvasHeight = dimension.height;
-      this.canvasWidth = dimension.width;
+    generateRandomGraph() {
+      //Generate random number of edges between 50 and
+      const numEdges = Math.ceil(10 * Math.random()) + 5;
+
+      this.graph = new Graph();
+
+      let nodes = [];
+      for (let i = 0; i < numEdges; i++) {
+        let key = Math.ceil(Math.random() * 100);
+        if (this.graph.containsKey(key) === false) {
+          let node = this.graph.add(key);
+          nodes.push(node);
+        }
+      }
+
+      //Now, create links between the nodes
+      let numNodes = nodes.length;
+      //   const maxEdges = (numNodes * (numNodes - 1)) / 2;
+      const maxEdges = 10;
+      let min = 0;
+      let max = nodes.length;
+      for (let i = 0; i < maxEdges; i++) {
+        let sourceIndex = Math.floor(Math.random() * (max - min) + min);
+        let targetIndex = Math.floor(Math.random() * (max - min) + min);
+        let sourceKey = nodes[sourceIndex].key;
+        let targetKey = nodes[targetIndex].key;
+
+        let weight = Math.floor(Math.random() * 100);
+
+        if (
+          sourceKey !== targetKey &&
+          this.graph.containsEdge(sourceKey, targetKey) === false
+        ) {
+          this.graph.link(sourceKey, targetKey, weight);
+        }
+      }
 
       this.initGraph();
     },
-
     addNode(data, x, y) {
       try {
         let node = this.graph.add(data);
@@ -342,7 +387,8 @@ export default {
       this.currentHover = null;
     },
     dragStartedNode(d, i) {
-      d3.select("svg")
+      console.log([d.x, d.y]);
+      d3.select("#canvas-382d3")
         .append("line")
         .attr("id", "drag-line")
         .attr("stroke", "#3F3F3F")
@@ -367,7 +413,7 @@ export default {
     },
     mouseOverLink(svgNode, d, i) {
       let link = d3.select(svgNode);
-
+      console.log("Mouseover", [d.x, d.y]);
       link
         .raise()
         .select("line")
@@ -403,6 +449,7 @@ export default {
     },
     clickNode(svgNode, d, i) {
       this.clickCoord = { x: d.x, y: d.y };
+      console.log("Click", [d.x, d.y]);
       this.showFloatingMenu = true;
       this.clickedElement = { type: "node", data: d };
     },
@@ -437,7 +484,7 @@ export default {
         let nodeKeys = [];
         let vertices = this.graph.vertices();
         vertices.forEach(node => {
-          d3.select("svg")
+          d3.select("#canvas-382d3")
             .append("circle")
             .attr("cx", node.x)
             .attr("cy", node.y)
@@ -481,13 +528,6 @@ export default {
     this.simulation = null;
 
     this.graph = new Graph();
-
-    this.graph.add(10);
-    this.graph.add(12);
-    this.graph.add(20);
-    this.graph.add(25);
-    this.graph.add(30);
-    this.graph.add(50);
 
     // this.graph.link(12, 10, null);
     // this.graph.link(20, 25, null);
