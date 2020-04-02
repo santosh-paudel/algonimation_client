@@ -9,7 +9,7 @@
         <input
           class="form-control border-right-0 aa-keep-dropdown h-100"
           type="search"
-          :placeholder="hint"
+          :placeholder="placeholder"
           aria-label="Search"
           v-model="searchString"
         />
@@ -48,7 +48,7 @@ export default {
       type: Array,
       required: true
     },
-    hint: {
+    placeholder: {
       type: String,
       required: false,
       default: "Search"

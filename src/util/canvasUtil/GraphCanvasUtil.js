@@ -233,6 +233,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         ];
 
         let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+        if (magnitude === 0) magnitude = 0.01;
         let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
 
         // //Now compute the target
@@ -256,6 +257,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         ];
 
         let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+        if (magnitude === 0) magnitude = 0.01;
         let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
 
         // //Now compute the target
@@ -275,6 +277,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         ];
 
         let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+        if (magnitude === 0) magnitude = 0.01;
         let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
 
         // //Now compute the target
@@ -296,6 +299,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
         ];
 
         let magnitude = Math.sqrt(vector[0] ** 2 + vector[1] ** 2);
+        if (magnitude === 0) magnitude = 0.01;
         let unitVector = [vector[0] / magnitude, vector[1] / magnitude];
 
         // //Now compute the target
