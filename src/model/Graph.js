@@ -99,7 +99,25 @@ class Graph {
     }
 
     getNode(key) {
-        return this._database[key];
+        if (this.containsKey(key)) return this._database[key];
+
+        return null;
+    }
+
+    getEdge(key1, key2) {
+
+        if (!this.containsEdge(key1, key2)) return null;
+
+        let linkId = `link-${key1}-${key2}`;
+        if (key2 <= key1) {
+            linkId = `link-${key2}-${key1}`;
+        }
+        return {
+            id: linkId,
+            source: this._database[key1],
+            target: this._database[key2],
+            weight: this._adjacencyList[key1][key2]
+        }
     }
 
     vertices() {
