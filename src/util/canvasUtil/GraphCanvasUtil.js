@@ -40,7 +40,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     opt.mouseout = opt.mouseout === undefined ? null : opt.mouseout;
     opt.dragEvents = opt.dragEvents === undefined ? null : opt.dragEvents;
 
-    let updateNodes = d3
+    const updateNodes = d3
       .select(`.${opt.parentClass}`)
       .selectAll(`.${opt.cssClass}`)
       .data(nodes, (node) => {
@@ -59,8 +59,13 @@ class GraphCanvasUtil extends BasicCanvasUtil {
       updateNodes.exit().remove();
     }
 
+    const mergedNode = enterNode.merge(updateNodes);
+
     enterNode
       .append("circle")
+
+    enterNode.merge(mergedNode)
+      .select("circle")
       .attr("r", opt.radius)
       .attr("stroke", opt.stroke)
       .attr("stroke-width", opt["stroke-width"])
@@ -120,7 +125,7 @@ class GraphCanvasUtil extends BasicCanvasUtil {
     //by using transform property. if fixedAtOrigin is true, it means
     //the group element should be kept at origin
     if (!opt.fixedAtOrigin) {
-      let mergedNode = enterNode.merge(updateNodes);
+
 
       //If the transitionTime is greater than 0, translate the node with transition
       //Otherwise, simply translate the node
@@ -187,8 +192,6 @@ class GraphCanvasUtil extends BasicCanvasUtil {
 
     enterLinks
       .append("line")
-      .attr("stroke-width", opt["stroke-width"])
-      .attr("stroke", opt["stroke"]);
 
     //Remove any links from the DOM which could not be bound to a datum
     if (opt.removeExitLinks) {
@@ -222,6 +225,8 @@ class GraphCanvasUtil extends BasicCanvasUtil {
       .merge(updateLinks)
       .select("line")
       .attr("cursor", "pointer")
+      .attr("stroke-width", opt["stroke-width"])
+      .attr("stroke", opt["stroke"])
       .transition()
       .duration(opt.transitionTime)
       .attr("x1", (link) => {

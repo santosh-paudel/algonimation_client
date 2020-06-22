@@ -122,6 +122,7 @@ export default {
             canvasWidth: Number,
             nodeRadius: 20.0,
             strokeWidth: "2px",
+            nodeFillColor: "#74DB86",
             currentHover: null,
 
             //Floating Input
@@ -170,7 +171,7 @@ export default {
             opt["stroke-width"] = this.strokeWidth;
             opt["stroke"] = "#747474";
             opt["radius"] = `${this.nodeRadius}px`;
-            opt["fill"] = "#74DB86";
+            opt["fill"] = this.nodeFillColor;
             opt["font-size"] = "14px";
             opt["font-color"] = "#FFFFFF";
             opt.fixedAtOrigin = false;
@@ -302,7 +303,11 @@ export default {
 
             this.showFloatingMenu = false;
         },
-
+        resetNodeLinkOptions() {
+            this.nodeRadius = 20.0;
+            this.strokeWidth = "2px";
+            this.nodeFillColor = "#74DB86";
+        },
         doGraphOperation(userInput, actionName) {
             switch (actionName) {
                 case "Dikstra's shortest path": {
@@ -337,6 +342,9 @@ export default {
              *   ]
              * }
              */
+
+            this.nodeFillColor = "#a2a2a2";
+            this.ticked();
 
             let result = this.graph.dikjstras(key1, key2);
 
