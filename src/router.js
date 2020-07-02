@@ -2,9 +2,9 @@ import Vue from "vue";
 import Router from "vue-router";
 
 
-import Home from "@/Home";
-import BinarySearchTree from "@/apps/BinarySearchTree";
-import UndirectedGraph from "@/apps/UndirectedGraph";
+import Home from "@/components/pages/Home/Home";
+import BinarySearchTree from "@/components/pages/BinarySearchTree/BinarySearchTree";
+import UndirectedGraph from "@/components/pages/UndirectedGraph/UndirectedGraph";
 
 Vue.use(Router);
 
