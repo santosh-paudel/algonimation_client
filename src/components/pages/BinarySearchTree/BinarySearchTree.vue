@@ -74,7 +74,7 @@
 import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
 import { TreeCanvasUtil } from "@/util/canvasUtil/TreeCanvasUtil.js";
-import DrawingBoardFluid from "@/components/DrawingBoardFluid.vue";
+import DrawingBoardFluid from "@/components/commons/DrawingBoardFluid.vue";
 import HRWithText from "@/components/UIComponents/HRWithText.vue";
 import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "@/components/RangeInput";

@@ -106,7 +106,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-debugger */
 import * as d3 from "d3";
-import DrawingBoardFluid from "@/components/DrawingBoardFluid.vue";
+import DrawingBoardFluid from "@/components/commons/DrawingBoardFluid.vue";
 import FloatingInputBox from "@/components/UIComponents/FloatingInputBox.vue";
 import FloatingMenu from "@/components/UIComponents/FloatingMenu.vue";
 import InputDataList from "@/components/UIComponents/InputDataList.vue";
