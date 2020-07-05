@@ -337,7 +337,7 @@ class BST {
 
     breadthFirstTraversal() {
         let collector = [];
-        for (var i = 1; i < this.height + 1; i++) {
+        for (var i = 1; i < this.height() + 1; i++) {
             this._breadthFirstTraversal(this.root, i, collector);
         }       
         return collector;
