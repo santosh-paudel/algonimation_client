@@ -194,6 +194,7 @@ class BST {
     height() {
         return this._height(this.root);
     }
+    
     _height(node) {
         if (node === null) return 0;
 
@@ -332,6 +333,25 @@ class BST {
         this._postorderTraversal(parent.left, collector);
         this._postorderTraversal(parent.right, collector);
         collector.push(parent);
+    }
+
+    breadthFirstTraversal() {
+        let collector = [];
+        for (var i = 1; i < this.height + 1; i++) {
+            this._breadthFirstTraversal(this.root, i, collector);
+        }       
+        return collector;
+    }
+
+    _breadthFirstTraversal(parent, level, collector) {
+        if (parent === null) return;
+        if (level === 1) {
+            collector.push(parent);
+        }
+        else if (level > 1) {
+            this._breadthFirstTraversal(parent.left, level-1, collector);
+            this._breadthFirstTraversal(parent.right, level-1, collector);
+        }
     }
 }
 

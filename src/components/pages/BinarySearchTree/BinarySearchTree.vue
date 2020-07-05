@@ -113,7 +113,8 @@ export default {
             otherBstOperations: [
                 "Inorder Traversal",
                 "Preorder Traversal",
-                "Postorder Traversal"
+                "Postorder Traversal",
+                "Breadth First Traversal"
             ],
 
             /**
@@ -156,6 +157,10 @@ export default {
                 case "Postorder Traversal":
                     this.edenName = actionName;
                     await this.postorderTraversal();
+                    break;
+                case "Breadth First Traversal":
+                    this.edenName = actionName;
+                    await this.breadthFirstTraversal();
                     break;
                 default:
                     debugger;
@@ -350,6 +355,19 @@ export default {
 
         async postorderTraversal() {
             let nodeIds = this.bstD3Wrapper.postorderTraversal();
+            await TreeCanvasUtil.traverseCircularNodesById(
+                nodeIds,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
+
+        async breadthFirstTraversal() {
+            let nodeIds = this.bstD3Wrapper.breadthFirstTraversal();
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeIds,
                 this.graph,

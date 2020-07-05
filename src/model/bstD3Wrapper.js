@@ -206,6 +206,17 @@ class BstD3Wrapper {
         return nodeIds;
     }
 
+    breadthFirstTraversal() {
+        let breadthFirstBstNodes = this.bst.breadthFirstTraversal();
+
+        let nodeIds = [];
+        breadthFirstBstNodes.forEach((node) => {
+            nodeIds.push(node.id);
+        })
+
+        return nodeIds;
+    }
+
 
     height() {
         return this.bst.height();
