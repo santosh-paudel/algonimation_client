@@ -114,7 +114,8 @@ export default {
                 "Inorder Traversal",
                 "Preorder Traversal",
                 "Postorder Traversal",
-                "Breadth First Traversal"
+                "Breadth First Traversal",
+                "Depth First Traversal"
             ],
 
             /**
@@ -161,6 +162,10 @@ export default {
                 case "Breadth First Traversal":
                     this.edenName = actionName;
                     await this.breadthFirstTraversal();
+                    break;
+                case "Depth First Traversal":
+                    this.edenName = actionName;
+                    await this.preorderTraversal();
                     break;
                 default:
                     debugger;
