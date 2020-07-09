@@ -1,6 +1,11 @@
 ### Drawing Board Fluid
 
-This component contains the actual canvas upon which all d3 elements should be drawn
+All components that draw a shape to the browser window should import this component and use the SVG element defined here as the container
+of such drawings. This component also contains the definition of all markers, such as arrowhead. The parent component can optionally listen to **on-canvas-ready** or **on-canvas-click** events which are fired when this component is mounted and when the user clicks on the component, respectively.
+
+![](docs/readme/resources/DrawingBoardFluid.png)
+
+Usage Example:
 
 ```js static
 <template>

@@ -82,7 +82,7 @@ import InputDataList from "@/components/UIComponents/InputDataList.vue";
 import EdenSpace from "@/components/DrawingComponents/EdenSpace.vue";
 const uuidv4 = require("uuid/v4");
 export default {
-    name: "BinarySearchTree5",
+    name: "BinarySearchTree",
     data: function() {
         return {
             /**
