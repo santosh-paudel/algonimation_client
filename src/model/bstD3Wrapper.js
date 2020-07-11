@@ -217,6 +217,28 @@ class BstD3Wrapper {
         return nodeIds;
     }
 
+    visitMinNode() {
+        let minNode = this.bst.visitMinNode();
+
+        let nodeId = [];
+        minNode.forEach((node) => {
+            nodeId.push(node.id);
+        })
+
+        return nodeId;
+    }
+
+    visitMaxNode() {
+        let maxNode = this.bst.visitMaxNode();
+
+        let nodeId = [];
+        maxNode.forEach((node) => {
+            nodeId.push(node.id);
+        })
+
+        return nodeId;
+    }
+
 
     height() {
         return this.bst.height();

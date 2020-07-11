@@ -115,7 +115,9 @@ export default {
                 "Preorder Traversal",
                 "Postorder Traversal",
                 "Breadth First Traversal",
-                "Depth First Traversal"
+                "Depth First Traversal",
+                "Maximum Node",
+                "Minimum Node"
             ],
 
             /**
@@ -166,6 +168,14 @@ export default {
                 case "Depth First Traversal":
                     this.edenName = actionName;
                     await this.preorderTraversal();
+                    break;
+                case "Minimum Node":
+                    this.edenName = actionName + ' Traversal';
+                    await this.visitMinNode();
+                    break;
+                case "Maximum Node":
+                    this.edenName = actionName + ' Traversal';
+                    await this.visitMaxNode();
                     break;
                 default:
                     debugger;
@@ -331,6 +341,32 @@ export default {
                 this.animationTimePrimary
             );
         },
+
+        visitMinNode: async function() {
+            let nodeId = this.bstD3Wrapper.visitMinNode();
+            await TreeCanvasUtil.traverseCircularNodesById(
+                nodeId,
+                this.graph,
+                false,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },     
+        
+        visitMaxNode: async function() {
+            let nodeId = this.bstD3Wrapper.visitMaxNode();
+            await TreeCanvasUtil.traverseCircularNodesById(
+                nodeId,
+                this.graph,
+                false,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },  
 
         async inorderTraversal() {
             let nodeIds = this.bstD3Wrapper.inorderTraversal();
