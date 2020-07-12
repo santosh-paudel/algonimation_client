@@ -19,17 +19,18 @@ class BasicCanvasUtil {
 
   /**
    * This method zooms in or out the element of given Id by increasing and decreasing the 
-   * radius of Node and fontsize of Node Content
+   * radius of Node, node stroke width of circle and fontsize of text
    * @param {String} id id of the node element that should be zoomed out
    * @param {Integer} nodeRadius radius of the circle of node group 
    * @param {Integer} nodeStrokeWidth stroke width (border) of the circle of the node group 
    * @param {Integer} fontSize font size of the text of the node group
    */
-  static async zoomNode(id, nodeRadius, nodeStrokeWidth, fontSize) {
+  static async zoomNode(id, nodeRadius, nodeStrokeWidth, fontSize, strokeColor) {
     let selection = d3.select(`#${id}`)
     selection.select('circle')
       .attr('r', nodeRadius)
       .attr('stroke-width', nodeStrokeWidth)
+      .attr('stroke', strokeColor)
     selection
       .select('text')
       .style('font-size', fontSize);
