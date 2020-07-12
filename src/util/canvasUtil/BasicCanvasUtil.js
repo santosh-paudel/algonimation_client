@@ -17,6 +17,13 @@ class BasicCanvasUtil {
     d3.select(`#${id}`).remove();
   }
 
+  static async zoomMinMax(id) {
+    return d3
+      .select(`#${id}`)
+      .select('circle')
+      .attr('r', 50);
+  }
+
   /**
    * This method moves the circle represented by the given id (parameter) to
    * new coordinates (newPosX, newPosY) over the given period of time (transitionTime)

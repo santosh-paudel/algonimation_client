@@ -358,7 +358,7 @@ class BST {
         let collector = [];
         let currentNode = this.root;
         while(currentNode.left !== null){
-            collector.push(currentNode);
+            // collector.push(currentNode);
             currentNode = currentNode.left;
         }        
         collector.push(currentNode);
@@ -369,7 +369,7 @@ class BST {
         let collector = [];
         let currentNode = this.root;
         while(currentNode.right !== null){
-            collector.push(currentNode);
+            // collector.push(currentNode);
             currentNode = currentNode.right;
         }        
         collector.push(currentNode);

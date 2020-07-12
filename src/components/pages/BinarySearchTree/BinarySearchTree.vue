@@ -80,6 +80,7 @@ import UserInputBox from "@/components/UserInputBox.vue";
 import RangeInput from "@/components/RangeInput";
 import InputDataList from "@/components/UIComponents/InputDataList.vue";
 import EdenSpace from "@/components/DrawingComponents/EdenSpace.vue";
+import { Transform } from 'stream';
 const uuidv4 = require("uuid/v4");
 export default {
     name: "BinarySearchTree",
@@ -170,11 +171,11 @@ export default {
                     await this.preorderTraversal();
                     break;
                 case "Minimum Node":
-                    this.edenName = actionName + ' Traversal';
+                    this.edenName = actionName;
                     await this.visitMinNode();
                     break;
                 case "Maximum Node":
-                    this.edenName = actionName + ' Traversal';
+                    this.edenName = actionName;
                     await this.visitMaxNode();
                     break;
                 default:
@@ -344,10 +345,11 @@ export default {
 
         visitMinNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMinNode();
+            await TreeCanvasUtil.zoomMinMax(nodeId);
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
-                false,
+                true,
                 "traversal-node",
                 this.nodeStrokeColorHilighted,
                 this.animationTimePrimary,
@@ -356,16 +358,17 @@ export default {
         },     
         
         visitMaxNode: async function() {
-            let nodeId = this.bstD3Wrapper.visitMaxNode();
+            let nodeId = this.bstD3Wrapper.visitMaxNode(); 
+            await TreeCanvasUtil.zoomMinMax(nodeId);           
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
-                false,
+                true,
                 "traversal-node",
                 this.nodeStrokeColorHilighted,
                 this.animationTimePrimary,
                 this.edenNodes
-            );
+            );            
         },  
 
         async inorderTraversal() {
