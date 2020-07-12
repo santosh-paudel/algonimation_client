@@ -89,7 +89,7 @@ export default {
             /**
              * Size of the text on a node
              */
-            fontSize: "20px",
+            fontSize: 16,
             /**
              * The color of nodes
              */
@@ -136,10 +136,25 @@ export default {
             this.edenNodes = [];
             this.edenName = "";
         },
+
+        async clearMaxZoom() {
+            let maxNodeId = this.bstD3Wrapper.visitMaxNode(); 
+            await TreeCanvasUtil.zoomNode(maxNodeId, this.nodeRadius, this.nodeStrokeWidth, this.fontSize);
+        },
+
+        async clearMinZoom() {
+            let minNodeId = this.bstD3Wrapper.visitMinNode(); 
+            await TreeCanvasUtil.zoomNode(minNodeId, this.nodeRadius, this.nodeStrokeWidth, this.fontSize);
+        },
+
         async userAction(userInput, actionName) {
             this.disableUserInteraction = true;
             //clear eden space before any operations
             this.clearEden();
+
+            // clear zoom effect of nodes before any operations
+            this.clearMaxZoom();
+            this.clearMinZoom();
             switch (actionName) {
                 case "insert":
                     await this.insertNode(userInput);
@@ -345,7 +360,7 @@ export default {
 
         visitMinNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMinNode();
-            await TreeCanvasUtil.zoomMinMax(nodeId);
+            await TreeCanvasUtil.zoomNode(nodeId, this.nodeRadius + 15, this.nodeStrokeWidth + 1, this.fontSize + 8);
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
@@ -359,7 +374,7 @@ export default {
         
         visitMaxNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMaxNode(); 
-            await TreeCanvasUtil.zoomMinMax(nodeId);           
+            await TreeCanvasUtil.zoomNode(nodeId, this.nodeRadius + 15, this.nodeStrokeWidth + 1, this.fontSize + 8);
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
@@ -474,7 +489,7 @@ export default {
             const offsetX = this.nodeRadius * 2 + this.nodeStrokeWidth;
 
             //Space on the y axis on top (add extra five for nicer padding)
-            const offsetY = this.nodeRadius + this.nodeStrokeWidth + 5;
+            const offsetY = this.nodeRadius + this.nodeStrokeWidth + 25;
 
             //space that should be left empty on the bottom for the
             //tree to grow when inserting new nodes (before the tree is
