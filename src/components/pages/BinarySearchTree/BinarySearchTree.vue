@@ -139,12 +139,24 @@ export default {
 
         async clearMaxZoom() {
             let maxNodeId = this.bstD3Wrapper.visitMaxNode(); 
-            await TreeCanvasUtil.zoomNode(maxNodeId, this.nodeRadius, this.nodeStrokeWidth, this.fontSize, this.nodeStrokeColorDefault);
+            await TreeCanvasUtil.zoomNode(
+                maxNodeId, 
+                this.nodeRadius, 
+                this.nodeStrokeWidth, 
+                this.fontSize, 
+                this.nodeStrokeColorDefault
+            );
         },
 
         async clearMinZoom() {
             let minNodeId = this.bstD3Wrapper.visitMinNode(); 
-            await TreeCanvasUtil.zoomNode(minNodeId, this.nodeRadius, this.nodeStrokeWidth, this.fontSize, this.nodeStrokeColorDefault);
+            await TreeCanvasUtil.zoomNode(
+                minNodeId, 
+                this.nodeRadius, 
+                this.nodeStrokeWidth, 
+                this.fontSize, 
+                this.nodeStrokeColorDefault
+            );
         },
 
         async userAction(userInput, actionName) {
@@ -360,7 +372,13 @@ export default {
 
         visitMinNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMinNode();
-            await TreeCanvasUtil.zoomNode(nodeId, this.nodeRadius + 15, this.nodeStrokeWidth + 2, this.fontSize + 8, this.nodeStrokeColorHilighted);
+            await TreeCanvasUtil.zoomNode(
+                nodeId, 
+                this.nodeRadius + 15, 
+                this.nodeStrokeWidth + 2, 
+                this.fontSize + 8, 
+                this.nodeStrokeColorHilighted
+            );
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
@@ -374,7 +392,13 @@ export default {
         
         visitMaxNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMaxNode(); 
-            await TreeCanvasUtil.zoomNode(nodeId, this.nodeRadius + 15, this.nodeStrokeWidth + 2, this.fontSize + 8, this.nodeStrokeColorHilighted);
+            await TreeCanvasUtil.zoomNode(
+                nodeId, 
+                this.nodeRadius + 15, 
+                this.nodeStrokeWidth + 2, 
+                this.fontSize + 8, 
+                this.nodeStrokeColorHilighted
+            );
             await TreeCanvasUtil.traverseCircularNodesById(
                 nodeId,
                 this.graph,
