@@ -194,7 +194,7 @@ class BST {
     height() {
         return this._height(this.root);
     }
-    
+
     _height(node) {
         if (node === null) return 0;
 
@@ -339,7 +339,7 @@ class BST {
         let collector = [];
         for (var i = 1; i < this.height() + 1; i++) {
             this._breadthFirstTraversal(this.root, i, collector);
-        }       
+        }
         return collector;
     }
 
@@ -347,20 +347,19 @@ class BST {
         if (parent === null) return;
         if (level === 1) {
             collector.push(parent);
-        }
-        else if (level > 1) {
-            this._breadthFirstTraversal(parent.left, level-1, collector);
-            this._breadthFirstTraversal(parent.right, level-1, collector);
+        } else if (level > 1) {
+            this._breadthFirstTraversal(parent.left, level - 1, collector);
+            this._breadthFirstTraversal(parent.right, level - 1, collector);
         }
     }
 
     visitMinNode() {
         let collector = [];
         let currentNode = this.root;
-        while(currentNode.left !== null){
+        while (currentNode.left !== null) {
             // collector.push(currentNode);
             currentNode = currentNode.left;
-        }        
+        }
         collector.push(currentNode);
         return collector;
     }
@@ -368,10 +367,10 @@ class BST {
     visitMaxNode() {
         let collector = [];
         let currentNode = this.root;
-        while(currentNode.right !== null){
+        while (currentNode.right !== null) {
             // collector.push(currentNode);
             currentNode = currentNode.right;
-        }        
+        }
         collector.push(currentNode);
         return collector;
     }

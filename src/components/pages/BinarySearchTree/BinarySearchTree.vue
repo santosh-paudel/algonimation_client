@@ -380,6 +380,28 @@ export default {
             );
         },
 
+        async clearMaxZoom() {
+            let maxNodeId = this.bstD3Wrapper.visitMaxNode();
+            await TreeCanvasUtil.zoomNode(
+                maxNodeId,
+                this.nodeRadius,
+                this.nodeStrokeWidth,
+                this.fontSize,
+                this.nodeStrokeColorDefault
+            );
+        },
+
+        async clearMinZoom() {
+            let minNodeId = this.bstD3Wrapper.visitMinNode();
+            await TreeCanvasUtil.zoomNode(
+                minNodeId,
+                this.nodeRadius,
+                this.nodeStrokeWidth,
+                this.fontSize,
+                this.nodeStrokeColorDefault
+            );
+        },
+
         visitMinNode: async function() {
             let nodeId = this.bstD3Wrapper.visitMinNode();
             await TreeCanvasUtil.zoomNode(
