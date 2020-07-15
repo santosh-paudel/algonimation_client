@@ -113,7 +113,6 @@ import InputDataList from "@/components/UIComponents/InputDataList.vue";
 import Modal from "@/components/UIComponents/Modal";
 import { Graph } from "@/model/Graph";
 import { GraphCanvasUtil } from "@/util/canvasUtil/GraphCanvasUtil";
-import { watch } from "fs";
 export default {
     name: "UndirectedGraph",
     data: function() {

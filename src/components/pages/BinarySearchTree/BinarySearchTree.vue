@@ -3,7 +3,31 @@
     make data[] a hieararchical data in data function
 2. -->
 <template>
-    <div class="container-fluid h-100 pb-sm-3 mt-5">
+    <base-layout
+        :userInstruction="userInstruction"
+        :basicUserActions="[
+            {name: 'Insert', inputRule: {type: 'integer', hint: 'E.g. 5' }}, 
+            {name: 'Delete', inputRule: {type: 'integer', hint: 'E.g. 10' }},
+            {name: 'Look Up', inputRule: {type: 'integer', hint: 'E.g. 12' }}
+        ]"
+        :randomizeBtn="{show:true, btnText:'Random Tree'}"
+        :custonUserActions="otherBstOperations"
+        @on-rand-btn-click="generateRandomTree"
+        @on-canvas-ready="onCanvasReady"
+        @on-user-action="userAction($event.actionName, $event.userInput)"
+    >
+        <template v-slot:canvas-footer>
+            <eden-space
+                class="aa-eden-space"
+                :nodes="edenNodes"
+                :name="edenName"
+                bgcolor="rgba(212, 114, 140, 0.03)"
+                :style="{ height: `${edenHeight}px` }"
+                @on-clear-eden="clearEden"
+            ></eden-space>
+        </template>
+    </base-layout>
+    <!-- <div class="container-fluid h-100 pb-sm-3 mt-5">
         <div class="row justify-content-center h-100">
             <div class="col-lg-9 col-md-8 col-sm-7 h-100" id="yellow">
                 <div class="d-flex flex-column h-100" style="border: 1px solid rgba(90,90,90, 0.2)">
@@ -66,21 +90,24 @@
                 ></input-data-list>
             </div>
         </div>
-    </div>
+    </div>-->
 </template>
 <script>
-/* eslint-disable no-debugger */
-/* eslint-disable no-unused-vars */
 import * as d3 from "d3";
 import { BstD3Wrapper } from "@/model/bstD3Wrapper.js";
 import { TreeCanvasUtil } from "@/util/canvasUtil/TreeCanvasUtil.js";
-import DrawingBoardFluid from "@/components/commons/DrawingBoardFluid.vue";
-import HRWithText from "@/components/UIComponents/HRWithText.vue";
-import UserInputBox from "@/components/UserInputBox.vue";
-import RangeInput from "@/components/RangeInput";
-import InputDataList from "@/components/UIComponents/InputDataList.vue";
+// import DrawingBoardFluid from "@/components/commons/DrawingBoardFluid.vue";
+// import HRWithText from "@/components/UIComponents/HRWithText.vue";
+// import UserInputBox from "@/components/UserInputBox.vue";
+// import RangeInput from "@/components/RangeInput";
+// import InputDataList from "@/components/UIComponents/InputDataList.vue";
 import EdenSpace from "@/components/DrawingComponents/EdenSpace.vue";
+import BaseLayout from "@/components/commons/BaseLayout.vue";
 const uuidv4 = require("uuid/v4");
+
+/**
+ * @example ../../../../docs/readme/BinarySearchTree.md
+ */
 export default {
     name: "BinarySearchTree",
     data: function() {
@@ -108,14 +135,12 @@ export default {
             orange: "#F45D27",
 
             //All the non reactive properties are defined in the created() lifecycle hook
-
-            disableUserInteraction: false,
             otherBstOperations: [
-                "Inorder Traversal",
-                "Preorder Traversal",
-                "Postorder Traversal",
-                "Breadth First Traversal",
-                "Depth First Traversal"
+                { actionName: "Inorder Traversal", userInput: null },
+                { actionName: "Preorder Traversal", userInput: null },
+                { actionName: "Postorder Traversal", userInput: null },
+                { actionName: "Breadth First Traversal", userInput: null },
+                { actionName: "Depth First Traversal", userInput: null }
             ],
 
             /**
@@ -125,26 +150,38 @@ export default {
             edenNodes: []
         };
     },
+    computed: {
+        userInstruction() {
+            return `<p>Begin by inserting a root node using the controls above. 
+            Then, delete or visit nodes using the adjacent controls. 
+            Use the dropdown above to perform other Tree operations search as BFS, DFS, Traversals, etc.</p>`;
+        }
+    },
     methods: {
+        /**
+         * This method should generate random tree
+         */
+        generateRandomTree() {
+            console.log("Generate random tree");
+        },
         /**
          * This method deletes all the svg elements drawn on the eden space.
          */
-        async clearEden(userInput) {
+        async clearEden() {
             this.edenNodes = [];
             this.edenName = "";
         },
-        async userAction(userInput, actionName) {
-            this.disableUserInteraction = true;
+        async userAction(actionName, userInput) {
             //clear eden space before any operations
             this.clearEden();
             switch (actionName) {
-                case "insert":
+                case "Insert":
                     await this.insertNode(userInput);
                     break;
-                case "delete":
+                case "Delete":
                     await this.deleteNode(userInput);
                     break;
-                case "visit":
+                case "Look Up":
                     await this.visitNode(userInput);
                     break;
                 case "Inorder Traversal":
@@ -168,11 +205,8 @@ export default {
                     await this.preorderTraversal();
                     break;
                 default:
-                    debugger;
                     break;
             }
-
-            this.disableUserInteraction = false;
         },
 
         changeAnimationSpeed(scale) {
@@ -430,7 +464,7 @@ export default {
 
             return opt;
         },
-        onCanvasInit(canvasSize) {
+        onCanvasReady(canvasSize) {
             //Space on the x axis on left
             const offsetX = this.nodeRadius * 2 + this.nodeStrokeWidth;
 
@@ -473,12 +507,13 @@ export default {
         // this.$gtag.event("login", { method: "Google" });
     },
     components: {
-        "hr-with-text": HRWithText,
-        "user-input-box": UserInputBox,
-        "range-input": RangeInput,
-        "drawing-board-fluid": DrawingBoardFluid,
-        "input-data-list": InputDataList,
-        "eden-space": EdenSpace
+        // "hr-with-text": HRWithText,
+        // "user-input-box": UserInputBox,
+        // "range-input": RangeInput,
+        // "drawing-board-fluid": DrawingBoardFluid,
+        // "input-data-list": InputDataList,
+        "eden-space": EdenSpace,
+        "base-layout": BaseLayout
     }
 };
 </script>
