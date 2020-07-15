@@ -115,7 +115,7 @@ export default {
             /**
              * Size of the text on a node
              */
-            fontSize: "20px",
+            fontSize: 16,
             /**
              * The color of nodes
              */
@@ -140,7 +140,9 @@ export default {
                 { actionName: "Preorder Traversal", userInput: null },
                 { actionName: "Postorder Traversal", userInput: null },
                 { actionName: "Breadth First Traversal", userInput: null },
-                { actionName: "Depth First Traversal", userInput: null }
+                { actionName: "Depth First Traversal", userInput: null },
+                { actionName: "Maximum Node", userInput: null },
+                { actionName: "Minimum Node", userInput: null }
             ],
 
             /**
@@ -174,6 +176,10 @@ export default {
         async userAction(actionName, userInput) {
             //clear eden space before any operations
             this.clearEden();
+
+            // clear zoom effect of nodes before any operations
+            this.clearMaxZoom();
+            this.clearMinZoom();
             switch (actionName) {
                 case "Insert":
                     await this.insertNode(userInput);
@@ -203,6 +209,14 @@ export default {
                 case "Depth First Traversal":
                     this.edenName = actionName;
                     await this.preorderTraversal();
+                    break;
+                case "Minimum Node":
+                    this.edenName = actionName;
+                    await this.visitMinNode();
+                    break;
+                case "Maximum Node":
+                    this.edenName = actionName;
+                    await this.visitMaxNode();
                     break;
                 default:
                     break;
@@ -366,6 +380,46 @@ export default {
             );
         },
 
+        visitMinNode: async function() {
+            let nodeId = this.bstD3Wrapper.visitMinNode();
+            await TreeCanvasUtil.zoomNode(
+                nodeId,
+                this.nodeRadius + 15,
+                this.nodeStrokeWidth + 2,
+                this.fontSize + 8,
+                this.nodeStrokeColorHilighted
+            );
+            await TreeCanvasUtil.traverseCircularNodesById(
+                nodeId,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
+
+        visitMaxNode: async function() {
+            let nodeId = this.bstD3Wrapper.visitMaxNode();
+            await TreeCanvasUtil.zoomNode(
+                nodeId,
+                this.nodeRadius + 15,
+                this.nodeStrokeWidth + 2,
+                this.fontSize + 8,
+                this.nodeStrokeColorHilighted
+            );
+            await TreeCanvasUtil.traverseCircularNodesById(
+                nodeId,
+                this.graph,
+                true,
+                "traversal-node",
+                this.nodeStrokeColorHilighted,
+                this.animationTimePrimary,
+                this.edenNodes
+            );
+        },
+
         async inorderTraversal() {
             let nodeIds = this.bstD3Wrapper.inorderTraversal();
             await TreeCanvasUtil.traverseCircularNodesById(
@@ -469,7 +523,7 @@ export default {
             const offsetX = this.nodeRadius * 2 + this.nodeStrokeWidth;
 
             //Space on the y axis on top (add extra five for nicer padding)
-            const offsetY = this.nodeRadius + this.nodeStrokeWidth + 5;
+            const offsetY = this.nodeRadius + this.nodeStrokeWidth + 25;
 
             //space that should be left empty on the bottom for the
             //tree to grow when inserting new nodes (before the tree is

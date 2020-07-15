@@ -353,6 +353,28 @@ class BST {
             this._breadthFirstTraversal(parent.right, level-1, collector);
         }
     }
+
+    visitMinNode() {
+        let collector = [];
+        let currentNode = this.root;
+        while(currentNode.left !== null){
+            // collector.push(currentNode);
+            currentNode = currentNode.left;
+        }        
+        collector.push(currentNode);
+        return collector;
+    }
+
+    visitMaxNode() {
+        let collector = [];
+        let currentNode = this.root;
+        while(currentNode.right !== null){
+            // collector.push(currentNode);
+            currentNode = currentNode.right;
+        }        
+        collector.push(currentNode);
+        return collector;
+    }
 }
 
 export {
