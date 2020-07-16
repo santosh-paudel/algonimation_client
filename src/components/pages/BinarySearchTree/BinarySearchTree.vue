@@ -11,7 +11,7 @@
             {name: 'Look Up', inputRule: {type: 'integer', hint: 'E.g. 12' }}
         ]"
         :randomizeBtn="{show:true, btnText:'Random Tree'}"
-        :custonUserActions="otherBstOperations"
+        :customUserActions="otherBstOperations"
         @on-rand-btn-click="generateRandomTree"
         @on-canvas-ready="onCanvasReady"
         @on-user-action="userAction($event.actionName, $event.userInput)"
@@ -163,8 +163,16 @@ export default {
         /**
          * This method should generate random tree
          */
-        generateRandomTree() {
-            console.log("Generate random tree");
+        async generateRandomTree() {
+            await this.insertNode(10);
+            await this.insertNode(5);
+            await this.insertNode(15);
+            await this.insertNode(3);
+            await this.insertNode(8);
+            await this.insertNode(1);
+            await this.insertNode(25);
+            await this.insertNode(18);
+            await this.insertNode(55);
         },
         /**
          * This method deletes all the svg elements drawn on the eden space.
