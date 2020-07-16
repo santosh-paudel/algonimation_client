@@ -166,15 +166,15 @@ export default {
             default: "This is where the user instruction goes"
         },
         /**
-         * Most Data Structures have basic actions that the user can perform such as Insertion, Deletion, Lookup, etc.
-         * This prop is an array of objects that lists all the basic actions that should be allowed to perform
-         * Currently, it only supports Insertion, Deletion and Lookup. Each object in the array represents a basic
-         * action, which has the following properties
+         * Most Data Structures support operations such as Insertion, Deletion, Lookup, etc.
+         * This prop lists all such operations that the user should be able to perform on the select data structures. 
+         * Currently, it only supports Insertion, Deletion and Lookup. Each object in the array has the following properties
          * {
-         *  name // Name of the basic action. Example: "Insert"
-         *  inputRules{ // inputRules is an object that describe inputs. It is used to validate user inputs, provide usability instructions, etc.
+         *  name // Name of the operation. Example: "Insert"
+         *  inputRules{ // inputRules is an object that describe further inputs required from the user to perform
+                        // the selected operation.
          *      type: // Data type of the input. Example: "integer"
-         *      hint: // Hint that should shown in the text box that gives user some clue on the type of values they should enter
+         *      hint: // Input hint that describe the types of input that should be provided (Example: "E.g. 5")
          *  }
          * }
          */
@@ -217,7 +217,7 @@ export default {
          * 2. inputRules: An array of objects that describe what kind of inputs are required
          *                from the user to perform such actions
          */
-        custonUserActions: {
+        customUserActions: {
             type: Array,
             default: function() {
                 return [
@@ -251,7 +251,7 @@ export default {
     computed: {
         actionNames() {
             const actionNames = [];
-            this.custonUserActions.forEach(action => {
+            this.customUserActions.forEach(action => {
                 actionNames.push(action.actionName);
             });
 
@@ -266,7 +266,7 @@ export default {
          */
         onUserAction(actionName) {
             let inputRule = null;
-            this.custonUserActions.forEach(action => {
+            this.customUserActions.forEach(action => {
                 if (action.actionName === actionName) {
                     inputRule = action.inputRule;
                 }
