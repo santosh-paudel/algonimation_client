@@ -77,6 +77,24 @@ class BstD3Wrapper {
         return this.d3Tree;
     }
 
+    async clearNode(node, node_clear_func){
+        node_clear_func(node.id)
+        if(node.children().length==0){
+            return
+        } 
+        else {            
+            let children = node.children()
+            for(let each of children)
+                this.clearNode(each, node_clear_func)
+        }
+    }
+
+    async clearTree(clear_func){
+        await this.clearNode(this.bst.root, clear_func) 
+        this.bst.root = null 
+        this.d3Tree = null
+    }
+
     insert(data, id) {
         this.bst.insert(data, id);
 
@@ -150,6 +168,7 @@ class BstD3Wrapper {
         this.bst.deleteNode(key, id);
         return this.tree(true);
     }
+
 
     deleteNode(d3Node) {
 

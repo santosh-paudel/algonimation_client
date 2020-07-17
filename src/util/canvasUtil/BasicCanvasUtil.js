@@ -17,6 +17,10 @@ class BasicCanvasUtil {
     d3.select(`#${id}`).remove();
   }
 
+  static async clearCanvas() {
+    await d3.select('.aa-graph').remove();
+  }
+
   /**
    * This method zooms in or out the element of given Id by increasing and decreasing the 
    * radius of Node, node stroke width of circle and fontsize of text

@@ -164,16 +164,26 @@ export default {
          * This method should generate random tree
          */
         async generateRandomTree() {
-            await this.insertNode(10);
-            await this.insertNode(5);
-            await this.insertNode(15);
-            await this.insertNode(3);
-            await this.insertNode(8);
-            await this.insertNode(1);
-            await this.insertNode(25);
-            await this.insertNode(18);
-            await this.insertNode(55);
+           
+           if(this.bstD3Wrapper.bst.root != null)
+           {
+                await this.bstD3Wrapper.clearTree(TreeCanvasUtil.clearNode);
+                await this.clearEden();
+           }
+            
+            // console.log("Root after clear: ", this.bstD3Wrapper.bst.root)
+
+            let offset = 400
+
+            await this.insertNode(10, this.animationTimePrimary - offset);
+            await this.insertNode(5, this.animationTimePrimary - offset);
+            await this.insertNode(15, this.animationTimePrimary - offset);
+            await this.insertNode(3, this.animationTimePrimary - offset);
+            await this.insertNode(8, this.animationTimePrimary - offset);
+            await this.insertNode(1, this.animationTimePrimary - offset);
+            await this.insertNode(25, this.animationTimePrimary - offset);          
         },
+
         /**
          * This method deletes all the svg elements drawn on the eden space.
          */
@@ -242,7 +252,7 @@ export default {
          * This method is called when the user clicks "Insert" button on
          * the screen
          */
-        insertNode: async function(inputInt) {
+        insertNode: async function(inputInt, animationTimePrimary=this.animationTimePrimary) {
             let nodeId = `node-${uuidv4()}`;
 
             // await this.insertNodeToTree(this.insertInput);
@@ -269,7 +279,7 @@ export default {
                     false,
                     ringId,
                     this.nodeStrokeColorHilighted,
-                    this.animationTimePrimary
+                    animationTimePrimary
                 );
 
                 //Now, when the height of the tree is greater than 1,
@@ -279,7 +289,7 @@ export default {
                     node.data.id,
                     node.x,
                     node.y,
-                    this.animationTimePrimary
+                    animationTimePrimary
                 );
                 // Draw links between the newly translated node and it's parent
                 let linkOpt = this.getDefaultLinkOptions();
@@ -292,13 +302,13 @@ export default {
                     ringId,
                     node.x,
                     node.y,
-                    this.animationTimePrimary
+                    animationTimePrimary
                 );
 
                 //Remove the hilighter node
                 TreeCanvasUtil.removeElementById(
                     ringId,
-                    this.animationTimePrimary
+                    animationTimePrimary
                 );
             }
 

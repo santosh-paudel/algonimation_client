@@ -65,6 +65,8 @@ class TreeCanvasUtil extends BasicCanvasUtil {
       .attr("fill", opt.fill);
 
     //append text
+
+
     enterNode
       .append("text")
       .attr("text-anchor", "middle")
@@ -135,6 +137,17 @@ class TreeCanvasUtil extends BasicCanvasUtil {
         });
       }
     }
+  }
+
+
+  /**
+   * This method deletes given node and its links
+   * For example, if the given node is Node(10) which has a left child Node(5), and right child Node(15), Node(10)
+   * link between Node(10) and Node(5), another between Node(10) and Node(15) is deleted
+   */
+  static clearNode(nodeId){
+    d3.select('#'+nodeId).remove();
+    d3.select('#link-'+nodeId).remove();
   }
 
   /**
