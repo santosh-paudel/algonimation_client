@@ -174,14 +174,15 @@ export default {
             // console.log("Root after clear: ", this.bstD3Wrapper.bst.root)
 
             let offset = 400
-
-            await this.insertNode(10, this.animationTimePrimary - offset);
-            await this.insertNode(5, this.animationTimePrimary - offset);
-            await this.insertNode(15, this.animationTimePrimary - offset);
-            await this.insertNode(3, this.animationTimePrimary - offset);
-            await this.insertNode(8, this.animationTimePrimary - offset);
-            await this.insertNode(1, this.animationTimePrimary - offset);
-            await this.insertNode(25, this.animationTimePrimary - offset);          
+            let randoms = [...Array(6)].map(() => Math.floor(Math.random() * 100));
+            for(let each of randoms)
+                await this.insertNode(each, this.animationTimePrimary - offset);
+            // await this.insertNode(5, this.animationTimePrimary - offset);
+            // await this.insertNode(15, this.animationTimePrimary - offset);
+            // await this.insertNode(3, this.animationTimePrimary - offset);
+            // await this.insertNode(8, this.animationTimePrimary - offset);
+            // await this.insertNode(1, this.animationTimePrimary - offset);
+            // await this.insertNode(25, this.animationTimePrimary - offset);          
         },
 
         /**

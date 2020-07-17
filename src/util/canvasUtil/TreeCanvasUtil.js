@@ -147,7 +147,7 @@ class TreeCanvasUtil extends BasicCanvasUtil {
    */
   static clearNode(nodeId){
     d3.select('#'+nodeId).remove();
-    d3.select('#link-'+nodeId).remove();
+    d3.select('#link-'+nodeId).remove();    
   }
 
   /**
