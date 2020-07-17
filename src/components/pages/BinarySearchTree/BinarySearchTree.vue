@@ -161,7 +161,7 @@ export default {
     },
     methods: {
         /**
-         * This method should generate random tree
+         * This method should generate random tree with 6 nodes every time
          */
         async generateRandomTree() {
            
@@ -176,13 +176,8 @@ export default {
             let offset = 400
             let randoms = [...Array(6)].map(() => Math.floor(Math.random() * 100));
             for(let each of randoms)
-                await this.insertNode(each, this.animationTimePrimary - offset);
-            // await this.insertNode(5, this.animationTimePrimary - offset);
-            // await this.insertNode(15, this.animationTimePrimary - offset);
-            // await this.insertNode(3, this.animationTimePrimary - offset);
-            // await this.insertNode(8, this.animationTimePrimary - offset);
-            // await this.insertNode(1, this.animationTimePrimary - offset);
-            // await this.insertNode(25, this.animationTimePrimary - offset);          
+                await this.insertNode(each, this.animationTimePrimary - offset);  
+
         },
 
         /**
