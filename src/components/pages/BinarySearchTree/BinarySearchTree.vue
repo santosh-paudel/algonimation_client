@@ -15,6 +15,8 @@
         @on-rand-btn-click="generateRandomTree"
         @on-canvas-ready="onCanvasReady"
         @on-user-action="userAction($event.actionName, $event.userInput)"
+        @on-import="loadTreeFromFile"
+        @on-export="exportTreeToFile"
     >
         <template v-slot:canvas-footer>
             <eden-space
@@ -103,7 +105,11 @@ import { TreeCanvasUtil } from "@/util/canvasUtil/TreeCanvasUtil.js";
 // import InputDataList from "@/components/UIComponents/InputDataList.vue";
 import EdenSpace from "@/components/DrawingComponents/EdenSpace.vue";
 import BaseLayout from "@/components/commons/BaseLayout.vue";
+// import { saveAs } from "file-saver";
 const uuidv4 = require("uuid/v4");
+// const fs = require('browserify-fs');
+// const path = require('path');
+// var FileSaver = require('file-saver');
 
 /**
  * @example ../../../../docs/readme/BinarySearchTree.md
@@ -156,7 +162,8 @@ export default {
         userInstruction() {
             return `<p>Begin by inserting a root node using the controls above. 
             Then, delete or visit nodes using the adjacent controls. 
-            Use the dropdown above to perform other Tree operations search as BFS, DFS, Traversals, etc.</p>`;
+            Use the dropdown above to perform other Tree operations search as BFS, DFS, Traversals, etc.
+            While exporting tree to the file, traverse the tree as Preorder, Postorder, Inorder, BFS or DFS first</p>`;
         }
     },
     methods: {
@@ -164,9 +171,9 @@ export default {
          * This method should generate random tree with 6 nodes every time
          */
         async generateRandomTree() {
-           
+        
            if(this.bstD3Wrapper.bst.root != null)
-           {
+           {    // recursively remove all the nodes and its links
                 await this.bstD3Wrapper.clearTree(TreeCanvasUtil.clearNode);
                 await this.clearEden();
            }
@@ -177,6 +184,56 @@ export default {
             let randoms = [...Array(6)].map(() => Math.floor(Math.random() * 100));
             for(let each of randoms)
                 await this.insertNode(each, this.animationTimePrimary - offset);  
+
+        },
+
+        /**
+         * This method import tree from a file input (.txt files)
+         */
+        loadTreeFromFile(event) {     
+            if(this.bstD3Wrapper.bst.root != null)
+            {    // recursively remove all the nodes and its links
+                this.bstD3Wrapper.clearTree(TreeCanvasUtil.clearNode);
+                this.clearEden();
+            }
+
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            let nodesList = [];
+            reader.onload = e => {
+                console.log(e.target.result);
+                nodesList = e.target.result.split(',');
+                for (let each of nodesList){
+                    let nodeId = `node-${uuidv4()}`;
+
+                    this.bstD3Wrapper.insert(parseInt(each), nodeId);
+                    this.drawTree();
+                }                    
+            }
+            reader.readAsText(file);
+        },
+
+        /**
+         * This method import tree from a file input (.txt files)
+         */
+        exportTreeToFile() {
+        
+           console.log('Exporting.....')
+           let nodes = this.edenNodes;
+           let str = nodes.toString()
+           console.log(str);
+
+        //    const filePath = path.join(__dirname + '/output.txt')
+        //    console.log(filePath)
+        //    let data = 'Test data...'
+        //    fs.writeFile('output.txt', data, (err) => {
+        //        if (err) throw err;
+        //        console.log('success');
+        //    })
+            // let blob = new Blob(data, {type: "text/plain;charset=utf-8"});
+            // FileSaver.saveAs(blob, 'output.txt')
+
+        //    console.log(this.bstD3Wrapper.inorderTraversal());
 
         },
 

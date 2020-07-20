@@ -61,6 +61,23 @@
                         </b-collapse>
                     </div>
                 </div>
+                
+                <div class="d-flex flex-row justify-content-center mb-0" style="height:20px">
+                    
+                    <input 
+                        type="file" 
+                        name="inputfile"
+                        id="inputfile"
+                        @change="$emit('on-import', $event)"
+                    >
+
+                    <b-button
+                        variant="light"
+                        class="text-secondary btn-sm mr-4 aa-button"
+                        @click="$emit('on-export',{})"
+                    >Export Tree to File</b-button>
+                </div>
+
                 <div
                     class="text-left text-info mt-4"
                     style="font-size:0.9rem;"
