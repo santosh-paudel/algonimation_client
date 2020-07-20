@@ -189,6 +189,7 @@ export default {
 
         /**
          * This method import tree from a file input (.txt files)
+         * For test purposes, there are two files in src/assets folder: bst.txt and test.txt respectively
          */
         loadTreeFromFile(event) {     
             if(this.bstD3Wrapper.bst.root != null)
@@ -214,27 +215,24 @@ export default {
         },
 
         /**
-         * This method import tree from a file input (.txt files)
+         * This method is defined to attached the download URL to the anchor tag href 
+         * since client side code should not allow to write on local file 
          */
-        exportTreeToFile() {
-        
-           console.log('Exporting.....')
+        download(text, name, type) {
+            let a = document.getElementById("file-export");
+            let file = new Blob([text], {type: type});
+            a.href = URL.createObjectURL(file);
+            a.download = name;
+        },
+
+        /**
+         * This method export tree traversed in specified order like BFS, DFS, Preorder, Postorder, Inorder 
+         * to a file output (.txt files) and downloaded simultaneously
+         */
+        exportTreeToFile() {          
            let nodes = this.edenNodes;
-           let str = nodes.toString()
-           console.log(str);
-
-        //    const filePath = path.join(__dirname + '/output.txt')
-        //    console.log(filePath)
-        //    let data = 'Test data...'
-        //    fs.writeFile('output.txt', data, (err) => {
-        //        if (err) throw err;
-        //        console.log('success');
-        //    })
-            // let blob = new Blob(data, {type: "text/plain;charset=utf-8"});
-            // FileSaver.saveAs(blob, 'output.txt')
-
-        //    console.log(this.bstD3Wrapper.inorderTraversal());
-
+           let str = nodes.toString();
+           this.download(str, 'output.txt', 'text/plain');
         },
 
         /**

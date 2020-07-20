@@ -71,11 +71,11 @@
                         @change="$emit('on-import', $event)"
                     >
 
-                    <b-button
+                    <a href="" id="file-export"><b-button
                         variant="light"
                         class="text-secondary btn-sm mr-4 aa-button"
                         @click="$emit('on-export',{})"
-                    >Export Tree to File</b-button>
+                    >Export Tree to File</b-button></a>
                 </div>
 
                 <div
