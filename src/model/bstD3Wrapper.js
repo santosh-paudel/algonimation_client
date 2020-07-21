@@ -93,6 +93,7 @@ class BstD3Wrapper {
         await this.clearNode(this.bst.root, clear_func) 
         this.bst.root = null 
         this.d3Tree = null
+        this.bst.orderofInsertion = []
     }
 
     insert(data, id) {

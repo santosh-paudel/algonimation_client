@@ -230,9 +230,11 @@ export default {
          * to a file output (.txt files) and downloaded simultaneously
          */
         exportTreeToFile() {          
-           let nodes = this.edenNodes;
-           let str = nodes.toString();
-           this.download(str, 'output.txt', 'text/plain');
+        //    let nodes = this.edenNodes;
+        //    let str = nodes.toString();
+           let nodes = this.bstD3Wrapper.bst.orderofInsertion;
+           console.log(nodes);
+           this.download(nodes, 'output.txt', 'text/plain');
         },
 
         /**

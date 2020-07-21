@@ -72,14 +72,17 @@ class Node {
 }
 class BST {
     root = null;
+    orderofInsertion = [];
 
     insert(data, id) {
         if (this.root === null) {
             this.root = new Node(data, id);
+            this.orderofInsertion.push(data);
             return this.root;
         }
 
         let node = this.insertData(data, id, this.root);
+        this.orderofInsertion.push(data);
         return node;
     }
     insertData(key, id, parentNode) {
@@ -87,11 +90,13 @@ class BST {
         if (parentNode === null) return new Node(key, id);
 
         /* Otherwise, recur down the tree */
-        if (key <= parentNode.key)
-            parentNode.left = this.insertData(key, id, parentNode.left);
-        else if (key > parentNode.key)
-            parentNode.right = this.insertData(key, id, parentNode.right);
-
+        if (key <= parentNode.key){
+            parentNode.left = this.insertData(key, id, parentNode.left);            
+        }
+        else if (key > parentNode.key){
+            parentNode.right = this.insertData(key, id, parentNode.right);            
+        }
+    
         /* return the (unchanged) node pointer */
         return parentNode;
     }
