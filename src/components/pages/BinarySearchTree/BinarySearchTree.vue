@@ -162,8 +162,7 @@ export default {
         userInstruction() {
             return `<p>Begin by inserting a root node using the controls above. 
             Then, delete or visit nodes using the adjacent controls. 
-            Use the dropdown above to perform other Tree operations search as BFS, DFS, Traversals, etc.
-            While exporting tree to the file, traverse the tree as Preorder, Postorder, Inorder, BFS or DFS first</p>`;
+            Use the dropdown above to perform other Tree operations search as BFS, DFS, Traversals, etc.</p>`;
         }
     },
     methods: {
@@ -226,14 +225,11 @@ export default {
         },
 
         /**
-         * This method export tree traversed in specified order like BFS, DFS, Preorder, Postorder, Inorder 
-         * to a file output (.txt files) and downloaded simultaneously
+         * This method export tree to a file output (.txt files) and download simultaneously
          */
         exportTreeToFile() {          
-        //    let nodes = this.edenNodes;
-        //    let str = nodes.toString();
            let nodes = this.bstD3Wrapper.bst.orderofInsertion;
-           console.log(nodes);
+        //    console.log(nodes);
            this.download(nodes, 'output.txt', 'text/plain');
         },
 
